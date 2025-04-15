@@ -1,4 +1,4 @@
 {
-    "NEWS_ENDPOINT": "your_news_endpoint_here",
-    "NEWS_KEY": "your_news_api_key_here"
+    "NEWS_ENDPOINT": "https://real-time-news-data.p.rapidapi.com/top-headlines",
+    "NEWS_KEY": "15b68acafamsh5fc9f08f26bd00cp165a4ejsncf34646b5e3c"
 }
