@@ -1,0 +1,4 @@
+{
+    "NEWS_ENDPOINT": "your_news_endpoint_here",
+    "NEWS_KEY": "your_news_api_key_here"
+}
