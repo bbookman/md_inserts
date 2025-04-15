@@ -29,26 +29,9 @@ def make_api_request(api_key: str, end_point: str, params: Optional[Dict[str, An
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
+        print(response.json())
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Error making API request: {e}")
         return {}
 
-# Example usage:
-if __name__ == "__main__":
-    with open('config.json') as f:
-        config = json.load(f)
-    
-    # Example with query parameters
-    params = {
-        "limit": 10,
-        "offset": 0,
-        "category": "technology"
-    }
-    
-    result = make_api_request(
-        api_key=config['NEWS_KEY'],
-        end_point=config['NEWS_ENDPOINT'],
-        params=params
-    )
-    print(result)
