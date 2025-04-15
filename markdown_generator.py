@@ -20,12 +20,12 @@ class Markdown:
             return "No news items found"
 
         # Create the header with current date
-        markdown = "## Today's News - {}\n\n".format(
+        markdown = "## Tomorrow's News - {}\n\n".format(
             datetime.now().strftime("%Y-%m-%d")
         )
 
         # Add each news item as a markdown link
         for item in news_items:
-            markdown += "- [{}]({})\n".format(item['title'], item['link'])
+            markdown += "- [{}]({})\n\n".format(item['title'], item['link'])
 
         return markdown
