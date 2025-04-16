@@ -1,6 +1,6 @@
 import json
 from api_util import make_api_request
-from parser import Parser
+from utility_parser import UtilityParser
 from markdown_generator import Markdown
 from file_handler import FILE_HANDLER
 from file_append_util import Append
@@ -26,7 +26,7 @@ def main():
     news_data = make_api_request(news_key, news_endpoint, params)
 
     # Parse the response
-    parser = Parser()
+    parser = UtilityParser()
     parsed_news = parser.parse_news(news_data)
 
     # Generate markdown from parsed news

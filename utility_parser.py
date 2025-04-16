@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 
-class Parser:
+class UtilityParser:
     """
     Class for parsing API responses.
     """
