@@ -114,13 +114,13 @@ class Markdown:
             movie_items (List[Dict[str, str]]): List of movie items with 'title', 'description', and 'image' keys.
 
         Returns:
-            str: Markdown formatted table of upcoming movies.
+            str: Markdown formatted table of top movies.
         """
         if not movie_items:
             return "No movie data found"
 
         # Start with a new line for spacing
-        markdown = "\n## Upcoming Movies - {}\n\n".format(
+        markdown = "\n## Top Movies - {}\n\n".format(
             datetime.now().strftime("%Y-%m-%d")
         )
         
@@ -138,8 +138,11 @@ class Markdown:
             if len(description) > 300:
                 description = description[:297] + "..."
                 
-            # Create image markdown or placeholder if no image
-            image_md = f"![{title}]({image_url})" if image_url else "No image available"
+            # Create image markdown using HTML with reduced size (33%)
+            if image_url:
+                image_md = f'<img src="{image_url}" alt="{title}" width="33%" />'
+            else:
+                image_md = "No image available"
             
             # Add the row to the table
             markdown += f"| **{title}** | {image_md} | {description} |\n"
