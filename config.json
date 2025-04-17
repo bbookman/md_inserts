@@ -1,13 +1,13 @@
 {
     "NEWS_ENDPOINT": "https://real-time-news-data.p.rapidapi.com/top-headlines",
-    "NEWS_KEY": "15b68acafamsh5fc9f08f26bd00cp165a4ejsncf34646b5e3c",
+    "NEWS_KEY": "",
     "TARGET_DIR": "/Users/brucebookman/bruce_vault/Conversations/journal",
     "WEATHER_ENDPOINT": "https://easy-weather1.p.rapidapi.com/daily/5",
-    "WEATHER_KEY": "15b68acafamsh5fc9f08f26bd00cp165a4ejsncf34646b5e3c",
+    "WEATHER_KEY": "",
     "LATITUDE": 34.2257,
     "LONGITUDE": -77.9447,
     "TOP_MOVIES_ENDPOINT": "https://imdb236.p.rapidapi.com/imdb/top-box-office",
-    "TOP_MOVIES_KEY": "15b68acafamsh5fc9f08f26bd00cp165a4ejsncf34646b5e3c",
+    "TOP_MOVIES_KEY": "",
     "NEWS_PARAMS": {
         "country": "US",
         "lang": "en",
