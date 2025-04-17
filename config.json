@@ -6,6 +6,8 @@
     "WEATHER_KEY": "",
     "LATITUDE": 34.2257,
     "LONGITUDE": -77.9447,
+    "TOP_MOVIES_ENDPOINT": "https://imdb236.p.rapidapi.com/imdb/top-box-office",
+    "TOP_MOVIES_KEY": "",
     "NEWS_PARAMS": {
         "country": "US",
         "lang": "en",

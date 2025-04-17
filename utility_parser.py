@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 class UtilityParser:
     """
@@ -80,4 +80,53 @@ class UtilityParser:
             parsed.append(forecast)
         
         print(f"Successfully parsed {len(parsed)} weather days")
+        return parsed
+
+    def parse_top_movies(self, movies_data: Union[List, Dict[Any, Any]]) -> List[Dict[str, str]]:
+        """
+        Parses movie data to extract titles, descriptions, and images.
+
+        Args:
+            movies_data: The API response containing movie information.
+
+        Returns:
+            List[Dict[str, str]]: A list of dictionaries with movie details.
+        """
+        print(f"Movies data type: {type(movies_data)}")
+        
+        # Handle case where response is a list instead of dict with 'results' key
+        if isinstance(movies_data, list):
+            movies = movies_data
+            print(f"Found direct list of {len(movies)} movies")
+        else:
+            # Try to get results from dictionary
+            if 'results' not in movies_data:
+                print("No 'results' key found in the response.")
+                return []
+            movies = movies_data.get('results', [])
+        
+        if not movies:
+            print("No movies found in the response.")
+            return []
+        
+        # Limit to 5 movies
+        movies = movies[:5]
+        print(f"Processing {len(movies)} movies")
+        
+        parsed = []
+        for movie in movies:
+            title = movie.get('primaryTitle', '')
+            description = movie.get('description', '')
+            image_url = movie.get('primaryImage', '')
+            if isinstance(image_url, dict):
+                image_url = image_url.get('url', '')
+            
+            if title:  # Only add if we have at least a title
+                parsed.append({
+                    'title': title,
+                    'description': description,
+                    'image': image_url
+                })
+        
+        print(f"Successfully parsed {len(parsed)} movies")
         return parsed
