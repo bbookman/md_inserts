@@ -151,31 +151,44 @@ class Markdown:
 
     def generate_billboard_markdown(self, billboard_items: List[Dict[str, str]], override_date=None) -> str:
         """
-        Generates markdown content from parsed Billboard data.
-        
+        Generates markdown content from parsed Billboard data as a table.
+
         Args:
-            billboard_items: List of song items
+            billboard_items (List[Dict[str, str]]): List of song items with song details
             override_date: Optional date to use in the heading instead of chart date
+
+        Returns:
+            str: Markdown formatted table of Billboard Hot 100 songs.
         """
         if not billboard_items:
             return "No Billboard data found"
 
-        # Use override_date if provided, otherwise get from API response
-        display_date = override_date or billboard_items[0].get('date', datetime.now().strftime("%Y-%m-%d"))
+        # Get the chart date from the first item or use override date
+        chart_date = override_date or billboard_items[0].get('date', datetime.now().strftime("%Y-%m-%d"))
         
-        markdown = f"\n## Billboard Hot 100 - {display_date}\n\n"
+        # Start with a new line for spacing
+        markdown = "\n## Billboard Hot 100 - {}\n\n".format(chart_date)
         
-        # Create a numbered list of songs
+        # Create table headers
+        markdown += "| Song | Artist | Position |\n"
+        markdown += "|------|--------|----------|\n"
+        
+        # Add each song as a row
         for i, song in enumerate(billboard_items):
             title = song.get('title', 'Unknown Title')
             artist = song.get('artist', 'Unknown Artist')
-            weeks_on_chart = song.get('weeks_on_chart', '0')
+            position = i + 1  # Chart position is the index + 1
             weeks_at_no1 = song.get('weeks_at_no1', '0')
+            weeks_on_chart = song.get('weeks_on_chart', '0')
             
-            # Add weeks at #1 for the top song
-            if i == 0 and weeks_at_no1 != '0':
-                markdown += f"{i+1}. **{title}** by *{artist}* (#{1} for {weeks_at_no1} weeks, {weeks_on_chart} weeks on chart)\n"
+            # Create position description
+            position_text = f"#{position}"
+            if position == 1 and weeks_at_no1 != '0':
+                position_text += f" ({weeks_at_no1} weeks at #1, {weeks_on_chart} weeks on chart)"
             else:
-                markdown += f"{i+1}. **{title}** by *{artist}* ({weeks_on_chart} weeks on chart)\n"
+                position_text += f" ({weeks_on_chart} weeks on chart)"
+            
+            # Add the row to the table
+            markdown += f"| **{title}** | *{artist}* | {position_text} |\n"
         
         return markdown
