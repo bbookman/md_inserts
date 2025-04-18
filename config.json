@@ -9,7 +9,7 @@
     "TOP_MOVIES_ENDPOINT": "https://imdb236.p.rapidapi.com/imdb/top-box-office",
     "TOP_MOVIES_KEY": "",
     "BILLBOARD_ENDPOINT": "https://billboard-api2.p.rapidapi.com/hot-100",
-    "BILLBOARD_KEY": "15b68acafamsh5fc9f08f26bd00cp165a4ejsncf34646b5e3c",
+    "BILLBOARD_KEY": "",
     "NEWS_PARAMS": {
         "country": "US",
         "lang": "en",
