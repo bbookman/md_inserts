@@ -4,24 +4,22 @@ from markdown_generator import Markdown
 
 def fetch_and_process_api_data(api_type, config):
     """
-    Generic function to fetch and process data from any API
-    
-    Args:
-        api_type: String identifier for the API (e.g., "NEWS", "WEATHER")
-        config: Configuration dictionary
-        
-    Returns:
-        Markdown content ready for insertion
+    Generic function to fetch and process data from any API.
     """
-    # Get API credentials and parameters
+    # Get API endpoint and the single RapidAPI key
     endpoint = config.get(f'{api_type}_ENDPOINT')
-    key = config.get(f'{api_type}_KEY')
+    key = config.get("RAPID_API_KEY")
     params = config.get(f'{api_type}_PARAMS', {})
     
-    # For weather, add latitude/longitude if available
-    if api_type == "WEATHER" and "latitude" not in params and "longitude" not in params:
-        params['latitude'] = config.get('LATITUDE')
-        params['longitude'] = config.get('LONGITUDE')
+    # Special handling for WEATHER API: ensure latitude and longitude are included
+    if api_type.upper() == "WEATHER":
+        if "latitude" not in params:
+            params["latitude"] = config.get("LATITUDE")
+        if "longitude" not in params:
+            params["longitude"] = config.get("LONGITUDE")
+    
+    print(f"Making {api_type} API request to: {endpoint}")
+    print(f"With parameters: {params}")
     
     # Call the API
     data = make_api_request(key, endpoint, params)
