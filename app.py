@@ -20,7 +20,10 @@ def main():
     # Process top movies data
     print(f"Making TOP_MOVIES API request to: {config['TOP_MOVIES_ENDPOINT']}")
     movies_markdown = fetch_and_process_api_data("TOP_MOVIES", config)
-    print(f"TOP_MOVIES API response keys: {list(movies_markdown.keys()) if isinstance(movies_markdown, dict) else 'Not a dictionary'}")
+    
+    # Process Billboard data
+    print(f"Making BILLBOARD API request to: {config['BILLBOARD_ENDPOINT']}")
+    billboard_markdown = fetch_and_process_api_data("BILLBOARD", config)
     
     # Get yesterday's file path
     file_handler = FILE_HANDLER()
@@ -32,6 +35,7 @@ def main():
         append_util.append_to_file(yesterday_file, news_markdown)
         append_util.append_to_file(yesterday_file, weather_markdown)
         append_util.append_to_file(yesterday_file, movies_markdown)
+        append_util.append_to_file(yesterday_file, billboard_markdown)
         print(f"Successfully appended data to {yesterday_file}")
     else:
         print("Yesterday's file not found")

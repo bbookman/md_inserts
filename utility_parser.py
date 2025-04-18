@@ -130,3 +130,59 @@ class UtilityParser:
         
         print(f"Successfully parsed {len(parsed)} movies")
         return parsed
+
+    def parse_billboard(self, billboard_data: Dict[Any, Any]) -> List[Dict[str, str]]:
+        """
+        Parses Billboard Hot 100 data to extract song information.
+
+        Args:
+            billboard_data (Dict[Any, Any]): The API response containing Billboard chart data.
+
+        Returns:
+            List[Dict[str, str]]: A list of dictionaries with song details.
+        """
+        print(f"Billboard data structure: {list(billboard_data.keys()) if isinstance(billboard_data, dict) else 'Invalid data'}")
+        
+        if 'info' not in billboard_data or 'content' not in billboard_data:
+            print("Required keys 'info' or 'content' not found in Billboard data")
+            return []
+        
+        # Get the chart date
+        chart_date = billboard_data['info'].get('date', '')
+        
+        # Parse songs from content
+        content = billboard_data['content']
+        if not content:
+            print("No song data found in Billboard response")
+            return []
+        
+        parsed = []
+        # Process top 10 songs (or fewer if less are available)
+        ranks_to_process = min(10, len(content))
+        
+        for i in range(1, ranks_to_process + 1):
+            # Billboard API uses string ranks as keys
+            rank_key = str(i)
+            
+            if rank_key not in content:
+                continue
+                
+            song = content[rank_key]
+            
+            # Extract required fields
+            title = song.get('title', '')
+            artist = song.get('artist', '')
+            weeks_at_no1 = song.get('weeks at no.1', '0')  # Default to '0' if not present
+            weeks_on_chart = song.get('weeks on chart', '0')  # Extract weeks on chart
+            
+            if title and artist:  # Only add if we have both title and artist
+                parsed.append({
+                    'date': chart_date,
+                    'title': title,
+                    'artist': artist,
+                    'weeks_at_no1': weeks_at_no1,
+                    'weeks_on_chart': weeks_on_chart  # Add to the dictionary
+                })
+        
+        print(f"Successfully parsed {len(parsed)} Billboard songs")
+        return parsed

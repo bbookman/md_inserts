@@ -8,6 +8,8 @@
     "LONGITUDE": -77.9447,
     "TOP_MOVIES_ENDPOINT": "https://imdb236.p.rapidapi.com/imdb/top-box-office",
     "TOP_MOVIES_KEY": "",
+    "BILLBOARD_ENDPOINT": "https://billboard-api2.p.rapidapi.com/hot-100",
+    "BILLBOARD_KEY": "",
     "NEWS_PARAMS": {
         "country": "US",
         "lang": "en",

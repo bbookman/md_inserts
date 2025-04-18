@@ -148,3 +148,38 @@ class Markdown:
             markdown += f"| **{title}** | {image_md} | {description} |\n"
         
         return markdown
+
+    def generate_billboard_markdown(self, billboard_items: List[Dict[str, str]]) -> str:
+        """
+        Generates markdown content from parsed Billboard data.
+
+        Args:
+            billboard_items (List[Dict[str, str]]): List of song items with 'title', 'artist', 
+                                                   'date', and 'weeks_at_no1' keys.
+
+        Returns:
+            str: Markdown formatted list of Billboard Hot 100 songs.
+        """
+        if not billboard_items:
+            return "No Billboard data found"
+
+        # Get the chart date from the first item
+        chart_date = billboard_items[0].get('date', datetime.now().strftime("%Y-%m-%d"))
+        
+        # Start with a new line for spacing
+        markdown = "\n## Billboard Hot 100 - {}\n\n".format(chart_date)
+        
+        # Create a numbered list of songs
+        for i, song in enumerate(billboard_items):
+            title = song.get('title', 'Unknown Title')
+            artist = song.get('artist', 'Unknown Artist')
+            weeks_on_chart = song.get('weeks_on_chart', '0')
+            weeks_at_no1 = song.get('weeks_at_no1', '0')
+            
+            # Add weeks at #1 for the top song
+            if i == 0 and weeks_at_no1 != '0':
+                markdown += f"{i+1}. **{title}** by *{artist}* (#{1} for {weeks_at_no1} weeks, {weeks_on_chart} weeks on chart)\n"
+            else:
+                markdown += f"{i+1}. **{title}** by *{artist}* ({weeks_on_chart} weeks on chart)\n"
+        
+        return markdown
