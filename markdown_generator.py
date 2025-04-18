@@ -149,25 +149,21 @@ class Markdown:
         
         return markdown
 
-    def generate_billboard_markdown(self, billboard_items: List[Dict[str, str]]) -> str:
+    def generate_billboard_markdown(self, billboard_items: List[Dict[str, str]], override_date=None) -> str:
         """
         Generates markdown content from parsed Billboard data.
-
+        
         Args:
-            billboard_items (List[Dict[str, str]]): List of song items with 'title', 'artist', 
-                                                   'date', and 'weeks_at_no1' keys.
-
-        Returns:
-            str: Markdown formatted list of Billboard Hot 100 songs.
+            billboard_items: List of song items
+            override_date: Optional date to use in the heading instead of chart date
         """
         if not billboard_items:
             return "No Billboard data found"
 
-        # Get the chart date from the first item
-        chart_date = billboard_items[0].get('date', datetime.now().strftime("%Y-%m-%d"))
+        # Use override_date if provided, otherwise get from API response
+        display_date = override_date or billboard_items[0].get('date', datetime.now().strftime("%Y-%m-%d"))
         
-        # Start with a new line for spacing
-        markdown = "\n## Billboard Hot 100 - {}\n\n".format(chart_date)
+        markdown = f"\n## Billboard Hot 100 - {display_date}\n\n"
         
         # Create a numbered list of songs
         for i, song in enumerate(billboard_items):

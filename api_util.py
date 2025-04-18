@@ -3,34 +3,43 @@ from typing import Dict, Any, Optional
 import json
 from urllib.parse import urlencode
 
-def make_api_request(api_key: str, end_point: str, params: Optional[Dict[str, Any]] = None) -> Dict[Any, Any]:
+def make_api_request(api_key: str, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[Any, Any]:
     """
-    Makes an API request using RapidAPI-style headers with optional query parameters
+    Makes an API request with the given credentials and parameters.
     
     Args:
-        api_key (str): The API key for authentication
-        end_point (str): The API endpoint URL
-        params (Optional[Dict[str, Any]]): Optional query parameters to append to the URL
+        api_key (str): The API key for authentication.
+        endpoint (str): The API endpoint URL.
+        params (dict, optional): Query parameters for the request.
         
     Returns:
-        Dict[Any, Any]: The JSON response from the API
+        dict: The JSON response from the API.
     """
     headers = {
-        'x-rapidapi-key': api_key,
-        'x-rapidapi-host': end_point.split('//')[1].split('/')[0]
+        'x-rapidapi-host': endpoint.split('/')[2],
+        'x-rapidapi-key': api_key
     }
     
-    # Append query parameters to the URL if provided
-    if params:
-        url = f"{end_point}?{urlencode(params)}"
-    else:
-        url = end_point
+    # Debug info
+    print(f"\nMaking request to: {endpoint}")
+    print(f"With parameters: {params}")
+    print(f"Headers: {headers}")
     
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
+        response = requests.get(endpoint, headers=headers, params=params)
+        
+        # Print the actual URL that was requested
+        print(f"Actual request URL: {response.url}")
+        
+        # Print response status
+        print(f"Response status: {response.status_code}")
+        
+        # Try to print some of the response text
+        print(f"Response preview: {response.text[:100]}...")
+        
+        response.raise_for_status()  # Raise an exception for HTTP errors
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Error making API request: {e}")
-        return {}
+        return {"ERROR": str(e)}
 
