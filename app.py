@@ -5,6 +5,7 @@ from file_handler import FILE_HANDLER
 from file_append_util import Append
 from fetcher import fetch_and_process_api_data
 from music_history import MusicHistoryProcessor
+from netflix_history import NetflixHistoryProcessor
 
 def load_config(config_path: str) -> dict:
     with open(config_path, 'r', encoding='utf-8') as f:
@@ -71,6 +72,12 @@ def main():
     music_processor = MusicHistoryProcessor(config)
     music_processor.append_tracks_to_files()
     print("Music history processing complete.")
+    
+    # After music history processing
+    print("Processing Netflix history for all markdown files...")
+    netflix_processor = NetflixHistoryProcessor(config)
+    netflix_processor.append_shows_to_files()
+    print("Netflix history processing complete.")
 
 if __name__ == "__main__":
     main()
