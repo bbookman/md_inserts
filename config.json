@@ -15,5 +15,6 @@
         "date": "", 
         "range": "1-10"
     },
-    "RAPID_API_KEY": ""
+    "RAPID_API_KEY": "",
+    "APPLE_MUSIC_FILE_PATH": "/Users/brucebookman/code/md_inserts/Apple Music - Track Play History.csv"
 }
