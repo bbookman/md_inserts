@@ -6,6 +6,7 @@ from file_append_util import Append
 from fetcher import fetch_and_process_api_data
 from music_history import MusicHistoryProcessor
 from netflix_history import NetflixHistoryProcessor
+from netflix_downloader import download_netflix_history
 
 def load_config(config_path: str) -> dict:
     with open(config_path, 'r', encoding='utf-8') as f:
@@ -14,6 +15,10 @@ def load_config(config_path: str) -> dict:
 def main():
     # Load config
     config = load_config('config.json')
+    
+    # Download Netflix viewing history first
+    print("Downloading Netflix viewing history...")
+    download_netflix_history(config)
     
     # Get yesterday's file path first, so we can extract the date
     file_handler = FILE_HANDLER()

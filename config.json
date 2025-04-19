@@ -1,6 +1,6 @@
 {
     "NEWS_ENDPOINT": "https://real-time-news-data.p.rapidapi.com/top-headlines",
-    "TARGET_DIR": "/Users/brucebookman/bruce_vault/Conversations/journal",
+    "TARGET_DIR": "/Users/brucebookman/bruce_vault/Conversations/journal_netflix_summaries",
     "WEATHER_ENDPOINT": "https://easy-weather1.p.rapidapi.com/daily/5",
     "LATITUDE": 34.2257,
     "LONGITUDE": -77.9447,

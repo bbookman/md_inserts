@@ -1,7 +1,8 @@
 import os
 import csv
+import glob
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 from collections import defaultdict
 
 class NetflixHistoryProcessor:
@@ -17,8 +18,39 @@ class NetflixHistoryProcessor:
             config (Dict): Configuration dictionary.
         """
         self.target_dir = config.get("TARGET_DIR", "")
-        self.netflix_file_path = config.get("NETFLIX_FILE_LOCATION", "")
-
+        self.netflix_file_path = self._find_netflix_history_file(config.get("NETFLIX_FILE_LOCATION", ""))
+    
+    def _find_netflix_history_file(self, file_path: str) -> str:
+        """
+        Find the first Netflix viewing history file in the directory.
+        Handles cases where the file might be named differently (e.g., NetflixViewingHistory(1).csv).
+        
+        Args:
+            file_path (str): Path specified in the config.
+            
+        Returns:
+            str: Path to the first matching Netflix viewing history file.
+        """
+        # Extract directory and base filename
+        directory = os.path.dirname(file_path)
+        
+        # If we can't find the directory, return the original path
+        if not os.path.exists(directory):
+            print(f"Netflix history directory not found: {directory}")
+            return file_path
+            
+        # Look for any file that starts with NetflixViewingHistory and ends with .csv
+        netflix_files = glob.glob(os.path.join(directory, "NetflixViewingHistory*.csv"))
+        
+        if netflix_files:
+            # Sort by modification time (newest first)
+            netflix_files.sort(key=os.path.getmtime, reverse=True)
+            print(f"Found Netflix history file: {netflix_files[0]}")
+            return netflix_files[0]
+        else:
+            print(f"No Netflix history files found in: {directory}")
+            return file_path
+    
     def get_shows_by_date(self) -> defaultdict:
         """
         Read the CSV file and organize Netflix shows by date.
