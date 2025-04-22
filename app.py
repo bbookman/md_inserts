@@ -50,65 +50,74 @@ def main():
     # The loop below handles all files.
 
     # --- Process Existing Files for API Data ---
-    print(f"\n--- Processing API Data for files in {target_dir} ---")
+    print(f"\n--- Processing API Data for files in {target_dir} and subdirectories ---")
     if not rapid_api_key:
         print("Skipping API data processing due to missing RAPID_API_KEY.")
     else:
         append_util = Append()
         processed_api_files = 0
-        for file_name in os.listdir(target_dir):
-            if file_name.endswith(".md"):
-                file_path = os.path.join(target_dir, file_name)
-                file_date_str = os.path.splitext(file_name)[0] # Expect YYYY-MM-DD
-
-                print(f"\nChecking API data for: {file_name}")
-                needs_update = False
-
-                # Check and fetch News
-                news_heading = "## News Headlines"
-                if not file_handler.file_contains_section(file_path, news_heading):
-                    print(f"  Fetching News data for {file_name}...")
-                    news_markdown = fetch_and_process_api_data("NEWS", config)
-                    if news_markdown:
-                        append_util.append_to_file(file_path, news_markdown)
-                        needs_update = True
-                    else:
-                         print(f"  No News data fetched.")
-                else:
-                    print(f"  News section already exists.")
-
-                # Check and fetch Weather
-                weather_heading = "## Weather"
-                if not file_handler.file_contains_section(file_path, weather_heading):
-                    print(f"  Fetching Weather data for {file_name}...")
-                    weather_markdown = fetch_and_process_api_data("WEATHER", config)
-                    if weather_markdown:
-                        append_util.append_to_file(file_path, weather_markdown)
-                        needs_update = True
-                    else:
-                        print(f"  No Weather data fetched.")
-                else:
-                    print(f"  Weather section already exists.")
-
-                # Check and fetch Movies
-                movies_heading = "## Top Box Office Movies"
-                if not file_handler.file_contains_section(file_path, movies_heading):
-                    print(f"  Fetching Movies data for {file_name}...")
-                    movies_markdown = fetch_and_process_api_data("TOP_MOVIES", config)
-                    if movies_markdown:
-                        append_util.append_to_file(file_path, movies_markdown)
-                        needs_update = True
-                    else:
-                        print(f"  No Movies data fetched.")
-                else:
-                    print(f"  Movies section already exists.")
-
-                # Check and fetch Billboard
-                billboard_heading = "## Billboard Hot 100"
-                if not file_handler.file_contains_section(file_path, billboard_heading):
-                    # Validate date format before making API call
+        # Use os.walk for recursive search
+        for root, dirs, files in os.walk(target_dir):
+            for file_name in files:
+                if file_name.endswith(".md"):
+                    file_path = os.path.join(root, file_name)
+                    # Try to extract date from filename, assuming YYYY-MM-DD.md format
                     try:
+                        file_date_str = os.path.splitext(file_name)[0]
+                        # Validate date format
                         datetime.strptime(file_date_str, '%Y-%m-%d')
+                        is_valid_date_file = True
+                    except ValueError:
+                        is_valid_date_file = False
+                        print(f"\nSkipping API checks for non-date file: {file_path}")
+                        continue # Skip files not matching the date format
+
+                    print(f"\nChecking API data for: {file_path}")
+                    needs_update = False
+
+                    # Check and fetch News
+                    news_heading = "## News Headlines"
+                    if not file_handler.file_contains_section(file_path, news_heading):
+                        print(f"  Fetching News data for {file_name}...")
+                        news_markdown = fetch_and_process_api_data("NEWS", config)
+                        if news_markdown:
+                            append_util.append_to_file(file_path, news_markdown)
+                            needs_update = True
+                        else:
+                             print(f"  No News data fetched.")
+                    else:
+                        print(f"  News section already exists.")
+
+                    # Check and fetch Weather
+                    weather_heading = "## Weather"
+                    if not file_handler.file_contains_section(file_path, weather_heading):
+                        print(f"  Fetching Weather data for {file_name}...")
+                        weather_markdown = fetch_and_process_api_data("WEATHER", config)
+                        if weather_markdown:
+                            append_util.append_to_file(file_path, weather_markdown)
+                            needs_update = True
+                        else:
+                            print(f"  No Weather data fetched.")
+                    else:
+                        print(f"  Weather section already exists.")
+
+                    # Check and fetch Movies
+                    movies_heading = "## Top Box Office Movies"
+                    if not file_handler.file_contains_section(file_path, movies_heading):
+                        print(f"  Fetching Movies data for {file_name}...")
+                        movies_markdown = fetch_and_process_api_data("TOP_MOVIES", config)
+                        if movies_markdown:
+                            append_util.append_to_file(file_path, movies_markdown)
+                            needs_update = True
+                        else:
+                            print(f"  No Movies data fetched.")
+                    else:
+                        print(f"  Movies section already exists.")
+
+                    # Check and fetch Billboard (only if filename is a valid date)
+                    billboard_heading = "## Billboard Hot 100"
+                    if not file_handler.file_contains_section(file_path, billboard_heading):
+                        # Date already validated above
                         print(f"  Fetching Billboard data for date {file_date_str}...")
                         billboard_config = config.copy()
                         if 'BILLBOARD_PARAMS' not in billboard_config:
@@ -121,13 +130,11 @@ def main():
                             needs_update = True
                         else:
                             print(f"  No Billboard data fetched for {file_date_str}.")
-                    except ValueError:
-                        print(f"  Skipping Billboard for {file_name}: Invalid date format '{file_date_str}'. Expected YYYY-MM-DD.")
-                else:
-                    print(f"  Billboard section already exists.")
+                    else:
+                        print(f"  Billboard section already exists.")
 
-                if needs_update:
-                    processed_api_files += 1
+                    if needs_update:
+                        processed_api_files += 1
 
         print(f"Finished processing API data. Updated {processed_api_files} file(s).")
 
