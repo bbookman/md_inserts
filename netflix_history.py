@@ -126,34 +126,57 @@ class NetflixHistoryProcessor:
 
     def append_shows_to_files(self):
         """
-        Append Netflix shows to markdown files in the target directory based on the date in the file name.
+        Process Netflix history data. For each date with viewing history,
+        ensure a corresponding markdown file exists and append the history
+        if it's not already present. Creates the file if it doesn't exist.
         """
         if not os.path.exists(self.target_dir):
             print(f"Target directory not found: {self.target_dir}")
             return
 
-        # Get shows organized by date
+        # Get shows organized by date (YYYY-MM-DD)
         shows_by_date = self.get_shows_by_date()
 
-        # Process each markdown file in the target directory
-        for file_name in os.listdir(self.target_dir):
-            if file_name.endswith(".md"):
-                file_date = os.path.splitext(file_name)[0]  # Extract date from file name
-                file_path = os.path.join(self.target_dir, file_name)
+        if not shows_by_date:
+            print("No Netflix history data found to process.")
+            return
 
-                if file_date in shows_by_date:
-                    print(f"Checking Netflix history for file: {file_name}")
-                    
-                    # Check if file already has Netflix history section
-                    if self.file_already_has_netflix_history(file_path):
-                        print(f"File {file_name} already has Netflix history section. Skipping.")
-                        continue
-                    
-                    # Append Netflix history
-                    with open(file_path, mode="a", encoding="utf-8") as file:
-                        file.write("\n## Netflix Viewing History\n\n")
-                        file.write("\n".join(shows_by_date[file_date]))
-                        file.write("\n")
-                    print(f"Added Netflix history to {file_name}")
+        # Iterate through each date found in the Netflix history
+        for file_date, shows in shows_by_date.items():
+            file_name = f"{file_date}.md"
+            file_path = os.path.join(self.target_dir, file_name)
+            
+            print(f"Processing Netflix date: {file_date}")
+
+            # Check if the target file exists
+            if os.path.exists(file_path):
+                print(f"File exists: {file_path}")
+                # Check if file already has Netflix history section
+                if self.file_already_has_netflix_history(file_path):
+                    print(f"File {file_name} already has Netflix history section. Skipping.")
+                    continue
                 else:
-                    print(f"No Netflix shows found for date {file_date}")
+                    # Append Netflix history to existing file
+                    try:
+                        with open(file_path, mode="a", encoding="utf-8") as file:
+                            file.write("\n## Netflix Viewing History\n\n")
+                            file.write("\n".join(shows))
+                            file.write("\n")
+                        print(f"Appended Netflix history to existing file: {file_name}")
+                    except Exception as e:
+                        print(f"Error appending to existing file {file_name}: {e}")
+
+            else:
+                # File does not exist, create it and add history
+                print(f"File does not exist, creating: {file_path}")
+                try:
+                    with open(file_path, mode="w", encoding="utf-8") as file:
+                        # Add a basic header
+                        file.write(f"# Journal Entry {file_date}\n\n")
+                        # Add the Netflix history section
+                        file.write("## Netflix Viewing History\n\n")
+                        file.write("\n".join(shows))
+                        file.write("\n")
+                    print(f"Created file and added Netflix history: {file_name}")
+                except Exception as e:
+                    print(f"Error creating file {file_name}: {e}")
