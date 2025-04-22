@@ -1,5 +1,7 @@
 import json
 import time
+import os
+import getpass # Import getpass
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -12,25 +14,29 @@ def load_config(config_path='config.json'):
     with open(config_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def download_netflix_history(config):
+def download_netflix_history(config, password): # Add password parameter
     """
     Automate logging into Netflix and downloading viewing history.
     
     Args:
-        config (dict): Configuration with Netflix credentials and URL
+        config (dict): Configuration with Netflix credentials (excluding password) and URL
+        password (str): The Netflix password provided by the user.
     """
     # Extract values from config
     url = config.get("NETFLIX_HISTORY_URL")
     username = config.get("EMAIL_ADDRESS")
-    password = config.get("NETFLIX_PASSWORD")
     
     # Validate required parameters
     if not url:
         print("Error: Netflix history URL not found in config.")
         return
     
-    if not username or not password:
-        print("Error: Netflix username and password required in config.")
+    if not username: # Only check for username now
+        print("Error: Netflix EMAIL_ADDRESS required in config.")
+        return
+    
+    if not password: # Check if password was provided
+        print("Error: Netflix password is required.")
         return
     
     # Set up Chrome options - let browser use default download location
@@ -56,7 +62,7 @@ def download_netflix_history(config):
             
             # Find password field and enter password
             password_field = driver.find_element(By.NAME, "password")
-            password_field.send_keys(password)
+            password_field.send_keys(password) # Use the passed password
             
             # Click submit button
             submit_button = driver.find_element(By.XPATH, "//button[@type='submit']")

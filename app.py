@@ -1,5 +1,6 @@
 import json
 import os
+import getpass # Import getpass
 from datetime import datetime
 from file_handler import FILE_HANDLER
 from file_append_util import Append
@@ -16,32 +17,56 @@ def main():
     # Load config
     config = load_config('config.json')
     
-    # Download Netflix viewing history first
+    # Check for RapidAPI Key before proceeding with API calls
+    rapid_api_key = config.get("RAPID_API_KEY")
+    if not rapid_api_key:
+        print("WARNING: RAPID_API_KEY is not set in config.json. Skipping News, Weather, Movies, and Billboard API calls.")
+
+    # Prompt for Netflix Password securely
+    netflix_password = getpass.getpass("Enter Netflix Password: ")
+    if not netflix_password:
+        print("Netflix password not provided. Exiting.")
+        return # Or handle as appropriate
+
+    # Download Netflix viewing history first, passing the password
     print("Downloading Netflix viewing history...")
-    download_netflix_history(config)
+    try:
+        download_netflix_history(config, netflix_password) # Pass password here
+        print("Netflix download function completed.")
+    except Exception as e:
+        print(f"ERROR downloading Netflix history: {e}")
     
     # Get yesterday's file path first, so we can extract the date
     file_handler = FILE_HANDLER()
     yesterday_file = file_handler.get_yesturday_file()
     
-    # Process API data only if yesterday's file exists
-    if yesterday_file:
+    # Initialize markdown variables outside the conditional block
+    news_markdown = ""
+    weather_markdown = ""
+    movies_markdown = ""
+    billboard_markdown = ""
+    file_date = None
+
+    # Process API data only if yesterday's file exists AND RapidAPI key is present
+    if yesterday_file and rapid_api_key:
         # Extract date from filename (assuming format like '2025-04-17.md')
         file_date = os.path.basename(yesterday_file).split('.')[0]  # Gets '2025-04-17'
         print(f"Extracted date from file: {file_date}")
         
         # Process news data
+        print("Processing News data...")
         news_markdown = fetch_and_process_api_data("NEWS", config)
         
         # Process weather data
+        print("Processing Weather data...")
         weather_markdown = fetch_and_process_api_data("WEATHER", config)
         
         # Process top movies data
-        print(f"Making TOP_MOVIES API request to: {config['TOP_MOVIES_ENDPOINT']}")
+        print("Processing Top Movies data...")
         movies_markdown = fetch_and_process_api_data("TOP_MOVIES", config)
         
         # Process Billboard data with date from filename
-        print(f"Making BILLBOARD API request for date: {file_date}")
+        print(f"Processing Billboard data for date: {file_date}")
         
         # Create a copy of config to modify for this specific call
         billboard_config = config.copy()
@@ -57,20 +82,16 @@ def main():
         
         # Append the markdown to the file
         append_util = Append()
-        append_util.append_to_file(yesterday_file, news_markdown)
-        append_util.append_to_file(yesterday_file, weather_markdown)
-        append_util.append_to_file(yesterday_file, movies_markdown)
-        append_util.append_to_file(yesterday_file, billboard_markdown)
+        if news_markdown: append_util.append_to_file(yesterday_file, news_markdown)
+        if weather_markdown: append_util.append_to_file(yesterday_file, weather_markdown)
+        if movies_markdown: append_util.append_to_file(yesterday_file, movies_markdown)
+        if billboard_markdown: append_util.append_to_file(yesterday_file, billboard_markdown)
         print(f"Successfully appended API data to {yesterday_file}")
+
+    elif yesterday_file and not rapid_api_key:
+        print("Skipping API data appending because RAPID_API_KEY is missing.")
     else:
         print("Yesterday's file not found. Skipping API data processing.")
-        # Optionally, uncomment these lines to create yesterday's file
-        # target_dir = config.get('TARGET_DIR', '')
-        # yesterday = datetime.now().strftime('%Y-%m-%d')
-        # yesterday_file = os.path.join(target_dir, f"{yesterday}.md")
-        # with open(yesterday_file, 'w', encoding='utf-8') as f:
-        #     f.write(f"# Journal Entry {yesterday}\n\n")
-        # print(f"Created new file: {yesterday_file}")
 
     # Process music history regardless of yesterday's file existence
     print("Processing music history for all markdown files...")
