@@ -124,22 +124,47 @@ class NetflixHistoryProcessor:
             print(f"Error checking file for Netflix history: {e}")
             return False
 
-    def append_shows_to_files(self):
+    def delete_netflix_history_file(self) -> bool:
+        """
+        Delete the Netflix history CSV file after processing.
+        
+        Returns:
+            bool: True if deletion was successful, False otherwise.
+        """
+        if not self.netflix_file_path or not os.path.exists(self.netflix_file_path):
+            print(f"Netflix history file not found for deletion: {self.netflix_file_path}")
+            return False
+            
+        try:
+            os.remove(self.netflix_file_path)
+            print(f"Successfully deleted Netflix history file: {self.netflix_file_path}")
+            return True
+        except Exception as e:
+            print(f"Error deleting Netflix history file {self.netflix_file_path}: {e}")
+            return False
+
+    def append_shows_to_files(self, delete_after_processing: bool = False) -> bool:
         """
         Process Netflix history data. For each date with viewing history,
         ensure a corresponding markdown file exists in the correct Year/Month Name subdirectory
         and append the history if it's not already present. Creates the file and directories if needed.
+        
+        Args:
+            delete_after_processing (bool): Whether to delete the Netflix history file after processing.
+            
+        Returns:
+            bool: True if processing was successful, False otherwise.
         """
         if not os.path.exists(self.target_dir):
             print(f"Target directory not found: {self.target_dir}")
-            return
+            return False
 
         # Get shows organized by date (YYYY-MM-DD)
         shows_by_date = self.get_shows_by_date()
 
         if not shows_by_date:
             print("No Netflix history data found to process.")
-            return
+            return False
 
         processed_files = 0
         created_files = 0
@@ -201,3 +226,9 @@ class NetflixHistoryProcessor:
                  continue
 
         print(f"Finished processing Netflix history. Appended to {processed_files} existing file(s), created {created_files} new file(s).")
+        
+        # Delete the history file if requested and there was at least one file processed
+        if delete_after_processing and (processed_files > 0 or created_files > 0):
+            return self.delete_netflix_history_file()
+            
+        return True

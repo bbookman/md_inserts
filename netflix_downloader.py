@@ -48,12 +48,12 @@ def download_netflix_history(config, password):
 
     # Set up Chrome options for headless mode
     chrome_options = Options()
-    # chrome_options.add_argument("--headless=new") # Commented out to disable headless mode
+    chrome_options.add_argument("--headless=new") # Re-enabled headless mode
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    print("DEBUG: Chrome options configured (headless mode disabled).") # Modified log
+    print("DEBUG: Chrome options configured for headless mode.") # Updated log message
 
     # Configure download behavior for headless mode
     prefs = {

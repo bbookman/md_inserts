@@ -74,7 +74,8 @@ class MusicHistoryProcessor:
         try:
             with open(file_path, mode="r", encoding="utf-8") as file:
                 content = file.read()
-                return "## Music Listening History" in content
+                # Check for the actual heading used in append_tracks_to_files
+                return "## Apple Music Play History" in content
         except Exception as e:
             print(f"Error reading file {file_path}: {e}")
             return False

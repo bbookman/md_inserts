@@ -157,8 +157,12 @@ def main():
         print("Proceeding with Netflix history processing...") # Added log
         try:
             netflix_processor = NetflixHistoryProcessor(config)
-            netflix_processor.append_shows_to_files()
-            print("Netflix history processing complete.")
+            # Pass True to delete the CSV file after processing
+            processing_result = netflix_processor.append_shows_to_files(delete_after_processing=True)
+            if processing_result:
+                print("Netflix history processing complete. Original CSV file deleted if data was processed.")
+            else:
+                print("Netflix history processing completed with issues. CSV file may not have been deleted.")
         except Exception as e:
             print(f"ERROR processing Netflix history: {e}")
     elif not netflix_password:
