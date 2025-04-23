@@ -127,8 +127,8 @@ class NetflixHistoryProcessor:
     def append_shows_to_files(self):
         """
         Process Netflix history data. For each date with viewing history,
-        ensure a corresponding markdown file exists and append the history
-        if it's not already present. Creates the file if it doesn't exist.
+        ensure a corresponding markdown file exists in the correct Year/Month Name subdirectory
+        and append the history if it's not already present. Creates the file and directories if needed.
         """
         if not os.path.exists(self.target_dir):
             print(f"Target directory not found: {self.target_dir}")
@@ -141,42 +141,63 @@ class NetflixHistoryProcessor:
             print("No Netflix history data found to process.")
             return
 
+        processed_files = 0
+        created_files = 0
         # Iterate through each date found in the Netflix history
         for file_date, shows in shows_by_date.items():
-            file_name = f"{file_date}.md"
-            file_path = os.path.join(self.target_dir, file_name)
-            
-            print(f"Processing Netflix date: {file_date}")
+            try:
+                # Extract year and month name from the date string (YYYY-MM-DD)
+                date_obj = datetime.strptime(file_date, '%Y-%m-%d')
+                year = date_obj.strftime('%Y')
+                month_name = date_obj.strftime('%B') # Get full month name (e.g., February)
 
-            # Check if the target file exists
-            if os.path.exists(file_path):
-                print(f"File exists: {file_path}")
-                # Check if file already has Netflix history section
-                if self.file_already_has_netflix_history(file_path):
-                    print(f"File {file_name} already has Netflix history section. Skipping.")
-                    continue
+                # Construct the target directory path including Year/Month Name
+                target_subdir = os.path.join(self.target_dir, year, month_name)
+                file_name = f"{file_date}.md"
+                file_path = os.path.join(target_subdir, file_name)
+
+                print(f"Processing Netflix date: {file_date} -> {file_path}")
+
+                # Ensure the target subdirectory exists
+                os.makedirs(target_subdir, exist_ok=True)
+
+                # Check if the target file exists
+                if os.path.exists(file_path):
+                    print(f"  File exists: {file_path}")
+                    # Check if file already has Netflix history section
+                    if self.file_already_has_netflix_history(file_path):
+                        print(f"  File {file_name} already has Netflix history section. Skipping.")
+                        continue
+                    else:
+                        # Append Netflix history to existing file
+                        try:
+                            with open(file_path, mode="a", encoding="utf-8") as file:
+                                file.write("\n## Netflix Viewing History\n\n")
+                                file.write("\n".join(shows))
+                                file.write("\n")
+                            print(f"  Appended Netflix history to existing file: {file_name}")
+                            processed_files += 1
+                        except Exception as e:
+                            print(f"  Error appending to existing file {file_name}: {e}")
+
                 else:
-                    # Append Netflix history to existing file
+                    # File does not exist, create it and add history
+                    print(f"  File does not exist, creating: {file_path}")
                     try:
-                        with open(file_path, mode="a", encoding="utf-8") as file:
-                            file.write("\n## Netflix Viewing History\n\n")
+                        with open(file_path, mode="w", encoding="utf-8") as file:
+                            # Add the Netflix history section (Removed Journal Entry header)
+                            file.write("## Netflix Viewing History\n\n")
                             file.write("\n".join(shows))
                             file.write("\n")
-                        print(f"Appended Netflix history to existing file: {file_name}")
+                        print(f"  Created file and added Netflix history: {file_name}")
+                        created_files += 1
                     except Exception as e:
-                        print(f"Error appending to existing file {file_name}: {e}")
+                        print(f"  Error creating file {file_name}: {e}")
+            except ValueError:
+                 print(f"Skipping invalid date format: {file_date}")
+                 continue
+            except Exception as e:
+                 print(f"An unexpected error occurred processing date {file_date}: {e}")
+                 continue
 
-            else:
-                # File does not exist, create it and add history
-                print(f"File does not exist, creating: {file_path}")
-                try:
-                    with open(file_path, mode="w", encoding="utf-8") as file:
-                        # Add a basic header
-                        file.write(f"# Journal Entry {file_date}\n\n")
-                        # Add the Netflix history section
-                        file.write("## Netflix Viewing History\n\n")
-                        file.write("\n".join(shows))
-                        file.write("\n")
-                    print(f"Created file and added Netflix history: {file_name}")
-                except Exception as e:
-                    print(f"Error creating file {file_name}: {e}")
+        print(f"Finished processing Netflix history. Appended to {processed_files} existing file(s), created {created_files} new file(s).")

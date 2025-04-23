@@ -81,8 +81,8 @@ class MusicHistoryProcessor:
 
     def append_tracks_to_files(self):
         """
-        Append music tracks to markdown files in the target directory and subdirectories
-        based on the date in the file name.
+        Append music tracks to markdown files in the target directory structure (Year/Month Name)
+        based on the date in the file name. Creates files and directories if needed.
         """
         if not os.path.exists(self.target_dir):
             print(f"Target directory not found: {self.target_dir}")
@@ -96,33 +96,57 @@ class MusicHistoryProcessor:
             return
 
         processed_files = 0
-        # Use os.walk for recursive search
-        for root, dirs, files in os.walk(self.target_dir):
-            for file_name in files:
-                if file_name.endswith(".md"):
-                    file_path = os.path.join(root, file_name)
-                    # Extract date from file name (assuming YYYY-MM-DD.md)
-                    file_date = os.path.splitext(file_name)[0]
+        created_files = 0
+        # Iterate through each date found in the music history
+        for file_date, tracks in tracks_by_date.items():
+            try:
+                # Extract year and month name from the date string (YYYY-MM-DD)
+                date_obj = datetime.strptime(file_date, '%Y-%m-%d')
+                year = date_obj.strftime('%Y')
+                month_name = date_obj.strftime('%B') # Get full month name (e.g., February)
 
-                    if file_date in tracks_by_date:
-                        print(f"Checking music history for file: {file_path}")
+                # Construct the target directory path including Year/Month Name
+                target_subdir = os.path.join(self.target_dir, year, month_name)
+                file_name = f"{file_date}.md"
+                file_path = os.path.join(target_subdir, file_name)
 
-                        # Check if file already has music history section
-                        if self.file_already_has_music_history(file_path):
-                            print(f"  File already has music history section. Skipping.")
-                            continue
+                print(f"Processing Music date: {file_date} -> {file_path}")
 
-                        # Append music history
-                        try:
-                            with open(file_path, mode="a", encoding="utf-8") as file:
-                                file.write("\n## Apple Music Play History\n\n")
-                                file.write("\n".join(tracks_by_date[file_date]))
-                                file.write("\n")
-                            print(f"  Added music history to {file_name}")
-                            processed_files += 1
-                        except Exception as e:
-                            print(f"  Error appending music history to {file_name}: {e}")
-                    # else: # Optional: Log if no music found for a file's date
-                    #     print(f"No music tracks found for date {file_date} (file: {file_name})")
+                # Ensure the target subdirectory exists
+                os.makedirs(target_subdir, exist_ok=True)
 
-        print(f"Finished processing music history. Updated {processed_files} file(s).")
+                # Check if the target file exists
+                if os.path.exists(file_path):
+                    print(f"  File already exists: {file_path}")
+                    # Check if file already has music history section
+                    if self.file_already_has_music_history(file_path):
+                        print(f"  File already has music history section. Skipping.")
+                        continue
+
+                    # Append music history
+                    try:
+                        with open(file_path, mode="a", encoding="utf-8") as file:
+                            file.write("\n## Apple Music Play History\n\n")
+                            file.write("\n".join(tracks))
+                            file.write("\n")
+                        print(f"  Added music history to {file_name}")
+                        processed_files += 1
+                    except Exception as e:
+                        print(f"  Error appending music history to {file_name}: {e}")
+                else:
+                    # File does not exist, create it and add history
+                    print(f"  File does not exist, creating: {file_path}")
+                    try:
+                        with open(file_path, mode="w", encoding="utf-8") as file:
+                            # Add the music history section (Removed Journal Entry header)
+                            file.write("## Apple Music Play History\n\n")
+                            file.write("\n".join(tracks))
+                            file.write("\n")
+                        print(f"  Created file and added music history: {file_name}")
+                        created_files += 1
+                    except Exception as e:
+                        print(f"  Error creating file {file_name}: {e}")
+            except Exception as e:
+                print(f"  Error processing date {file_date}: {e}")
+
+        print(f"Finished processing music history. Appended to {processed_files} existing file(s), created {created_files} new file(s).")

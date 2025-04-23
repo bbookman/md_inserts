@@ -18,19 +18,22 @@ class FILE_HANDLER:
         self.config = self._load_config(config_path)
         self.target_dir = self.config.get('TARGET_DIR', '')
         # Check if the target directory exists upon initialization
-        if not self.target_dir or not os.path.exists(self.target_dir):
-            print(f"ERROR: Target directory specified in config does not exist: {self.target_dir}")
-            # Optionally, create the directory:
-            # try:
-            #     os.makedirs(self.target_dir)
-            #     print(f"Created directory: {self.target_dir}")
-            # except OSError as e:
-            #     print(f"Error creating directory {self.target_dir}: {e}")
-            #     self.target_dir = None # Mark as invalid if creation fails
-            self.target_dir = None # Mark directory as invalid if it doesn't exist
+        if not self.target_dir:
+            print(f"ERROR: No target directory specified in config.")
+            self.target_dir = None
+        elif not os.path.exists(self.target_dir):
+            print(f"Target directory specified in config does not exist: {self.target_dir}")
+            try:
+                # Create the directory structure if it doesn't exist
+                os.makedirs(self.target_dir, exist_ok=True)
+                print(f"Created target directory: {self.target_dir}")
+            except OSError as e:
+                print(f"ERROR: Failed to create target directory {self.target_dir}: {e}")
+                print(f"ERROR details - errno: {e.errno}, strerror: {e.strerror}, filename: {e.filename}")
+                self.target_dir = None  # Mark as invalid if creation fails
         elif not os.path.isdir(self.target_dir):
             print(f"ERROR: Target path specified in config is not a directory: {self.target_dir}")
-            self.target_dir = None # Mark directory as invalid
+            self.target_dir = None  # Mark as invalid if not a directory
 
     def _load_config(self, config_path: str) -> dict:
         """

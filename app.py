@@ -33,6 +33,7 @@ def main():
 
     # --- Netflix Download ---
     netflix_password = getpass.getpass("Enter Netflix Password: ")
+    download_succeeded = False # Initialize flag
     if not netflix_password:
         print("Netflix password not provided. Skipping Netflix download and processing.")
         # Set password to None to indicate it wasn't provided for later checks
@@ -40,10 +41,15 @@ def main():
     else:
         print("Downloading Netflix viewing history...")
         try:
-            download_netflix_history(config, netflix_password)
-            print("Netflix download function completed.")
+            # Capture the return value
+            download_succeeded = download_netflix_history(config, netflix_password)
+            if download_succeeded:
+                print("Netflix download function completed successfully.")
+            else:
+                print("Netflix download function completed but reported failure.")
         except Exception as e:
-            print(f"ERROR downloading Netflix history: {e}")
+            print(f"ERROR during Netflix download call: {e}")
+            download_succeeded = False # Ensure flag is false on exception
 
     # --- REMOVED Redundant Yesterday File Processing Block ---
     # The logic to find and process only yesterday's file for API data has been removed.
@@ -146,12 +152,19 @@ def main():
 
     # --- Process Netflix History ---
     print(f"\n--- Processing Netflix History (will create files if needed) ---")
-    if netflix_password: # Only process if password was provided for download
-        netflix_processor = NetflixHistoryProcessor(config)
-        netflix_processor.append_shows_to_files()
-        print("Netflix history processing complete.")
-    else:
+    # Only process if password was provided AND download succeeded
+    if netflix_password and download_succeeded:
+        print("Proceeding with Netflix history processing...") # Added log
+        try:
+            netflix_processor = NetflixHistoryProcessor(config)
+            netflix_processor.append_shows_to_files()
+            print("Netflix history processing complete.")
+        except Exception as e:
+            print(f"ERROR processing Netflix history: {e}")
+    elif not netflix_password:
         print("Skipping Netflix history processing as password was not provided.")
+    else: # Password provided but download failed
+        print("Skipping Netflix history processing as download did not succeed.")
 
     print("\nApplication finished.")
 

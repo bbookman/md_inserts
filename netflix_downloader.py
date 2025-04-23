@@ -23,6 +23,7 @@ def download_netflix_history(config, password):
         config (dict): Configuration with Netflix credentials (excluding password) and URL
         password (str): The Netflix password provided by the user.
     """
+    print("DEBUG: download_netflix_history function started.") # Added
     # Extract values from config
     url = config.get("NETFLIX_HISTORY_URL")
     username = config.get("EMAIL_ADDRESS")
@@ -30,13 +31,13 @@ def download_netflix_history(config, password):
     # Validate required parameters
     if not url:
         print("Error: Netflix history URL not found in config.")
-        return
+        return False
     if not username:
         print("Error: Netflix EMAIL_ADDRESS required in config.")
-        return
+        return False
     if not password:
         print("Error: Netflix password is required.")
-        return
+        return False
 
     # Set download directory (user's Downloads folder)
     download_dir = os.path.expanduser("~/Downloads")
@@ -47,12 +48,12 @@ def download_netflix_history(config, password):
 
     # Set up Chrome options for headless mode
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
+    # chrome_options.add_argument("--headless=new") # Commented out to disable headless mode
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    print("DEBUG: Chrome options configured for headless mode.")
+    print("DEBUG: Chrome options configured (headless mode disabled).") # Modified log
 
     # Configure download behavior for headless mode
     prefs = {
@@ -62,9 +63,11 @@ def download_netflix_history(config, password):
         "safebrowsing.enabled": True
     }
     chrome_options.add_experimental_option("prefs", prefs)
+    print("DEBUG: Chrome download preferences configured.") # Added
 
     # Initialize the driver
     driver = None # Initialize driver to None
+    download_successful = False # Initialize success flag
     print("DEBUG: Attempting to initialize WebDriver...")
     try:
         # Consider using webdriver-manager if chromedriver isn't in PATH
@@ -151,6 +154,7 @@ def download_netflix_history(config, password):
                     downloaded_file_path = os.path.join(download_dir, found_files[0])
                     print(f"DEBUG: File found in loop: {downloaded_file_path}")
                     file_found = True
+                    download_successful = True # Set success flag
                     break # Exit loop once file is found
                 else:
                     # Print status periodically
@@ -172,20 +176,20 @@ def download_netflix_history(config, password):
             print("DEBUG: Download loop finished. File was found.")
         else:
             print(f"DEBUG: Download loop finished. File NOT found after {max_wait_time} seconds.")
-            # Consider raising an error here if download is critical
-            # raise TimeoutException(f"Netflix download did not complete within {max_wait_time} seconds.")
+            download_successful = False # Ensure flag is false if timeout
 
     except TimeoutException as e:
         print(f"ERROR: Timeout waiting for page elements. Check internet or Netflix page structure. {e}")
-        # if driver: driver.save_screenshot("general_timeout_screenshot.png")
+        download_successful = False # Ensure flag is false on error
     except NoSuchElementException as e:
         print(f"ERROR: Could not find a required element during automation: {e}")
-        # if driver: driver.save_screenshot("element_not_found_screenshot.png")
+        download_successful = False # Ensure flag is false on error
     except Exception as e:
         # Catch any other unexpected errors during WebDriver operation
         print(f"ERROR: An unexpected error occurred during Netflix download: {e}")
         import traceback
         traceback.print_exc() # Print detailed traceback
+        download_successful = False # Ensure flag is false on error
     finally:
         # Close the browser
         if driver:
@@ -193,4 +197,5 @@ def download_netflix_history(config, password):
             driver.quit()
         else:
             print("DEBUG: WebDriver was not initialized, nothing to quit.")
-        print("DEBUG: Exiting download_netflix_history function.")
+        print(f"DEBUG: Exiting download_netflix_history function. Success: {download_successful}") # Modified log
+        return download_successful # Return the success status
