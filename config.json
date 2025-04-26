@@ -19,5 +19,6 @@
     "APPLE_MUSIC_FILE_PATH": "/Users/brucebookman/code/md_inserts/Apple Music - Track Play History.csv",
     "NETFLIX_HISTORY_URL": "https://www.netflix.com/viewingactivity",
     "EMAIL_ADDRESS": "bruce.bookman@gmail.com",
-    "NETFLIX_FILE_LOCATION": "/Users/brucebookman/Downloads/NetflixViewingHistory.csv"
+    "NETFLIX_FILE_LOCATION": "/Users/brucebookman/Downloads/NetflixViewingHistory.csv",
+    "YELP_USER_REVIEWS_HTML": "/Users/brucebookman/Downloads/Yelp/html/user_review.html"
 }

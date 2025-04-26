@@ -8,6 +8,7 @@ from fetcher import fetch_and_process_api_data
 from music_history import MusicHistoryProcessor
 from netflix_history import NetflixHistoryProcessor
 from netflix_downloader import download_netflix_history
+from yelp_parser import YelpReviewProcessor  # Import the new YelpReviewProcessor class
 
 def load_config(config_path: str) -> dict:
     with open(config_path, 'r', encoding='utf-8') as f:
@@ -169,6 +170,20 @@ def main():
         print("Skipping Netflix history processing as password was not provided.")
     else: # Password provided but download failed
         print("Skipping Netflix history processing as download did not succeed.")
+
+    # --- Process Yelp Reviews ---
+    print(f"\n--- Processing Yelp Reviews (will create files if needed) ---")
+    # Check if Yelp HTML file path is specified in config
+    if "YELP_USER_REVIEWS_HTML" in config and config.get("YELP_USER_REVIEWS_HTML"):
+        print("Proceeding with Yelp reviews processing...")
+        try:
+            yelp_processor = YelpReviewProcessor(config)
+            yelp_processor.append_reviews_to_files()
+            print("Yelp reviews processing complete.")
+        except Exception as e:
+            print(f"ERROR processing Yelp reviews: {e}")
+    else:
+        print("Skipping Yelp reviews processing as YELP_USER_REVIEWS_HTML is not specified in config.")
 
     print("\nApplication finished.")
 
