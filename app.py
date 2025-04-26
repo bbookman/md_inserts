@@ -154,9 +154,14 @@ def main():
 
     # --- Process Music History ---
     print(f"\n--- Processing Music History for files in {target_dir} ---")
-    music_processor = MusicHistoryProcessor(config)
-    music_processor.append_tracks_to_files()
-    print("Music history processing complete.")
+    # Check if Apple Music file path is specified in config
+    apple_music_file_path = config.get("APPLE_MUSIC_FILE_PATH")
+    if not apple_music_file_path:
+        print("WARNING: APPLE_MUSIC_FILE_PATH is not set. Skipping Apple Music history processing.")
+    else:
+        music_processor = MusicHistoryProcessor(config)
+        music_processor.append_tracks_to_files()
+        print("Music history processing complete.")
 
     # --- Process Netflix History ---
     print(f"\n--- Processing Netflix History (will create files if needed) ---")
