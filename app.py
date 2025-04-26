@@ -31,26 +31,33 @@ def main():
     rapid_api_key = config.get("RAPID_API_KEY")
     if not rapid_api_key:
         print("WARNING: RAPID_API_KEY is not set. Skipping News, Weather, Movies, and Billboard API calls.")
-
-    # --- Netflix Download ---
-    netflix_password = getpass.getpass("Enter Netflix Password: ")
-    download_succeeded = False # Initialize flag
-    if not netflix_password:
-        print("Netflix password not provided. Skipping Netflix download and processing.")
-        # Set password to None to indicate it wasn't provided for later checks
-        netflix_password = None
+        
+    # --- Netflix File Location Check ---
+    netflix_file_location = config.get("NETFLIX_FILE_LOCATION")
+    if not netflix_file_location:
+        print("WARNING: NETFLIX_FILE_LOCATION is not set. Skipping Netflix download and processing.")
+        netflix_password = None  # Skip Netflix processing
+        download_succeeded = False
     else:
-        print("Downloading Netflix viewing history...")
-        try:
-            # Capture the return value
-            download_succeeded = download_netflix_history(config, netflix_password)
-            if download_succeeded:
-                print("Netflix download function completed successfully.")
-            else:
-                print("Netflix download function completed but reported failure.")
-        except Exception as e:
-            print(f"ERROR during Netflix download call: {e}")
-            download_succeeded = False # Ensure flag is false on exception
+        # --- Netflix Download ---
+        netflix_password = getpass.getpass("Enter Netflix Password: ")
+        download_succeeded = False # Initialize flag
+        if not netflix_password:
+            print("Netflix password not provided. Skipping Netflix download and processing.")
+            # Set password to None to indicate it wasn't provided for later checks
+            netflix_password = None
+        else:
+            print("Downloading Netflix viewing history...")
+            try:
+                # Capture the return value
+                download_succeeded = download_netflix_history(config, netflix_password)
+                if download_succeeded:
+                    print("Netflix download function completed successfully.")
+                else:
+                    print("Netflix download function completed but reported failure.")
+            except Exception as e:
+                print(f"ERROR during Netflix download call: {e}")
+                download_succeeded = False # Ensure flag is false on exception
 
     # --- REMOVED Redundant Yesterday File Processing Block ---
     # The logic to find and process only yesterday's file for API data has been removed.

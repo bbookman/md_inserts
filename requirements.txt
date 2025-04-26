@@ -2,3 +2,4 @@ requests
 selenium
 pandas
 webdriver-manager
+beautifulsoup4
