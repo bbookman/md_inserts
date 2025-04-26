@@ -11,6 +11,11 @@ def fetch_and_process_api_data(api_type, config):
     key = config.get("RAPID_API_KEY")
     params = config.get(f'{api_type}_PARAMS', {})
     
+    # Check if endpoint is specified
+    if not endpoint:
+        print(f"WARNING: {api_type}_ENDPOINT is not set. Skipping {api_type} API data fetch.")
+        return None
+    
     # Special handling for WEATHER API: ensure latitude and longitude are included
     if api_type.upper() == "WEATHER":
         if "latitude" not in params:

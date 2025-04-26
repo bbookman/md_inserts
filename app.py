@@ -32,10 +32,19 @@ def main():
     if not rapid_api_key:
         print("WARNING: RAPID_API_KEY is not set. Skipping News, Weather, Movies, and Billboard API calls.")
         
-    # --- Netflix File Location Check ---
+    # --- Netflix Configuration Check ---
     netflix_file_location = config.get("NETFLIX_FILE_LOCATION")
-    if not netflix_file_location:
-        print("WARNING: NETFLIX_FILE_LOCATION is not set. Skipping Netflix download and processing.")
+    netflix_history_url = config.get("NETFLIX_HISTORY_URL")
+    email_address = config.get("EMAIL_ADDRESS")
+    
+    # Skip Netflix processing if any required Netflix config is missing
+    if not netflix_file_location or not netflix_history_url or not email_address:
+        if not netflix_file_location:
+            print("WARNING: NETFLIX_FILE_LOCATION is not set. Skipping Netflix download and processing.")
+        if not netflix_history_url:
+            print("WARNING: NETFLIX_HISTORY_URL is not set. Skipping Netflix download and processing.")
+        if not email_address:
+            print("WARNING: EMAIL_ADDRESS is not set. Skipping Netflix download and processing.")
         netflix_password = None  # Skip Netflix processing
         download_succeeded = False
     else:
