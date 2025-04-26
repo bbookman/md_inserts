@@ -185,8 +185,11 @@ def main():
 
     # --- Process Yelp Reviews ---
     print(f"\n--- Processing Yelp Reviews (will create files if needed) ---")
-    # Check if Yelp HTML file path is specified in config
-    if "YELP_USER_REVIEWS_HTML" in config and config.get("YELP_USER_REVIEWS_HTML"):
+    # Check if Yelp HTML file path is specified and not empty in config
+    yelp_html_path = config.get("YELP_USER_REVIEWS_HTML")
+    if not yelp_html_path:
+        print("WARNING: YELP_USER_REVIEWS_HTML is not set. Skipping Yelp reviews processing.")
+    else:
         print("Proceeding with Yelp reviews processing...")
         try:
             yelp_processor = YelpReviewProcessor(config)
@@ -194,8 +197,6 @@ def main():
             print("Yelp reviews processing complete.")
         except Exception as e:
             print(f"ERROR processing Yelp reviews: {e}")
-    else:
-        print("Skipping Yelp reviews processing as YELP_USER_REVIEWS_HTML is not specified in config.")
 
     print("\nApplication finished.")
 
