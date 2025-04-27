@@ -2,8 +2,8 @@
     "NEWS_ENDPOINT": "https://real-time-news-data.p.rapidapi.com/top-headlines",
     "TARGET_DIR": "",
     "WEATHER_ENDPOINT": "",
-    "LATITUDE": 34.2257,
-    "LONGITUDE": -77.9447,
+    "LATITUDE": 4.2257,
+    "LONGITUDE": 1.2345,
     "TOP_MOVIES_ENDPOINT": "https://imdb236.p.rapidapi.com/imdb/top-box-office",
     "BILLBOARD_ENDPOINT": "https://billboard-api2.p.rapidapi.com/hot-100",
     "NEWS_PARAMS": {
