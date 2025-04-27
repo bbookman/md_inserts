@@ -88,6 +88,11 @@ class MusicHistoryProcessor:
         if not os.path.exists(self.target_dir):
             print(f"Target directory not found: {self.target_dir}")
             return
+            
+        # Check if target directory is writable
+        if not os.access(self.target_dir, os.W_OK):
+            print(f"Error: Target directory is not writable: {self.target_dir}")
+            return
 
         # Get tracks organized by date
         tracks_by_date = self.get_tracks_by_date()
@@ -104,21 +109,37 @@ class MusicHistoryProcessor:
                 # Extract year and month name from the date string (YYYY-MM-DD)
                 date_obj = datetime.strptime(file_date, '%Y-%m-%d')
                 year = date_obj.strftime('%Y')
+                month_number = date_obj.strftime('%m') # Get month number (e.g., 02)
                 month_name = date_obj.strftime('%B') # Get full month name (e.g., February)
 
-                # Construct the target directory path including Year/Month Name
-                target_subdir = os.path.join(self.target_dir, year, month_name)
+                # Construct the target directory path including Year/MM-Month Name
+                target_subdir = os.path.join(self.target_dir, year, f"{month_number}-{month_name}")
                 file_name = f"{file_date}.md"
                 file_path = os.path.join(target_subdir, file_name)
 
                 print(f"Processing Music date: {file_date} -> {file_path}")
 
                 # Ensure the target subdirectory exists
-                os.makedirs(target_subdir, exist_ok=True)
+                try:
+                    os.makedirs(target_subdir, exist_ok=True)
+                except OSError as e:
+                    print(f"Error creating directory {target_subdir}: {e}")
+                    continue
+                
+                # Check if subdirectory is writable
+                if not os.access(target_subdir, os.W_OK):
+                    print(f"Error: Directory is not writable: {target_subdir}")
+                    continue
 
                 # Check if the target file exists
                 if os.path.exists(file_path):
                     print(f"  File already exists: {file_path}")
+                    
+                    # Check if file is writable
+                    if not os.access(file_path, os.W_OK):
+                        print(f"  Error: File is not writable: {file_path}")
+                        continue
+                        
                     # Check if file already has music history section
                     if self.file_already_has_music_history(file_path):
                         print(f"  File already has music history section. Skipping.")
