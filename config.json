@@ -1,6 +1,6 @@
 {
     "NEWS_ENDPOINT": "https://real-time-news-data.p.rapidapi.com/top-headlines",
-    "TARGET_DIR": "/Users/brucebookman/bruce_vault/Conversations/inserts_test",
+    "TARGET_DIR": "",
     "WEATHER_ENDPOINT": "",
     "LATITUDE": 34.2257,
     "LONGITUDE": -77.9447,
@@ -16,9 +16,9 @@
         "range": "1-10"
     },
     "RAPID_API_KEY": "",
-    "APPLE_MUSIC_FILE_PATH": "/Users/brucebookman/code/md_inserts/Apple Music - Track Play History.csv",
+    "APPLE_MUSIC_FILE_PATH": "Apple Music - Track Play History.csv",
     "NETFLIX_HISTORY_URL": "https://www.netflix.com/viewingactivity",
-    "EMAIL_ADDRESS": "bruce.bookman@gmail.com",
+    "EMAIL_ADDRESS": "",
     "NETFLIX_FILE_LOCATION": "",
-    "YELP_USER_REVIEWS_HTML": "/Users/brucebookman/code/md_inserts/Yelp/html/user_review.html"
+    "YELP_USER_REVIEWS_HTML": "Yelp/html/user_review.html"
 }
