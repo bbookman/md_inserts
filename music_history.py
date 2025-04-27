@@ -88,6 +88,11 @@ class MusicHistoryProcessor:
         if not os.path.exists(self.target_dir):
             print(f"Target directory not found: {self.target_dir}")
             return
+            
+        # Check if target directory is writable
+        if not os.access(self.target_dir, os.W_OK):
+            print(f"Error: Target directory is not writable: {self.target_dir}")
+            return
 
         # Get tracks organized by date
         tracks_by_date = self.get_tracks_by_date()
@@ -114,11 +119,26 @@ class MusicHistoryProcessor:
                 print(f"Processing Music date: {file_date} -> {file_path}")
 
                 # Ensure the target subdirectory exists
-                os.makedirs(target_subdir, exist_ok=True)
+                try:
+                    os.makedirs(target_subdir, exist_ok=True)
+                except OSError as e:
+                    print(f"Error creating directory {target_subdir}: {e}")
+                    continue
+                
+                # Check if subdirectory is writable
+                if not os.access(target_subdir, os.W_OK):
+                    print(f"Error: Directory is not writable: {target_subdir}")
+                    continue
 
                 # Check if the target file exists
                 if os.path.exists(file_path):
                     print(f"  File already exists: {file_path}")
+                    
+                    # Check if file is writable
+                    if not os.access(file_path, os.W_OK):
+                        print(f"  Error: File is not writable: {file_path}")
+                        continue
+                        
                     # Check if file already has music history section
                     if self.file_already_has_music_history(file_path):
                         print(f"  File already has music history section. Skipping.")
