@@ -192,3 +192,38 @@ class Markdown:
             markdown += f"| **{title}** | *{artist}* | {position_text} |\n"
         
         return markdown
+    
+    def generate_movies_attended_markdown(self, movie_items: List[Dict[str, str]]) -> str:
+        """
+        Generates markdown content for movies attended at theaters.
+        
+        Args:
+            movie_items (List[Dict[str, str]]): List of movie items with 'movie_name', 'theater_name', 
+                                               and 'theater_address' keys.
+        
+        Returns:
+            str: Markdown formatted list of movies attended.
+        """
+        if not movie_items:
+            return "No movie attendance data found"
+            
+        # Start with the header
+        markdown = "\n## Movies Attended\n\n"
+        
+        # Add each movie as a bullet point with theater info
+        for movie in movie_items:
+            movie_name = movie.get('movie_name', 'Unknown Movie')
+            theater_name = movie.get('theater_name', '')
+            theater_address = movie.get('theater_address', '')
+            
+            # Format the entry with theater and address if available
+            entry = f"* {movie_name}"
+            
+            if theater_name:
+                entry += f" at {theater_name}"
+                if theater_address:
+                    entry += f" ({theater_address})"
+            
+            markdown += f"{entry}\n"
+        
+        return markdown

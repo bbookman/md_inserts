@@ -218,10 +218,16 @@ def main():
                     try:
                         fandango_processor = FandangoHistoryProcessor(config)
                         fandango_processing_result = fandango_processor.append_purchases_to_files(delete_after_processing=True)
-                        if fandango_processing_result:
+                        if fandango_processing_result == True:
                             print("Fandango purchase history processing complete. Original file deleted if data was processed.")
                         else:
-                            print("Fandango purchase history processing completed with issues. File may not have been deleted.")
+                            # Get the specific reason why processing failed
+                            if not fandango_processor.fandango_html_file or not os.path.exists(fandango_processor.fandango_html_file):
+                                print("No Fandango purchase history file found to process.")
+                            elif hasattr(fandango_processor, 'last_error') and fandango_processor.last_error:
+                                print(f"Fandango processing failed: {fandango_processor.last_error}")
+                            else:
+                                print("No Fandango purchase history data was found in the downloaded file.")
                     except Exception as e:
                         print(f"ERROR processing Fandango purchase history: {e}")
                 else:

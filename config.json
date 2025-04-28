@@ -1,6 +1,6 @@
 {
     "NEWS_ENDPOINT": "",
-    "TARGET_DIR": "Users/brucebookman/bruce_vault/Conversations/journal",
+    "TARGET_DIR": "/Users/brucebookman/bruce_vault/Conversations/journal",
     "WEATHER_ENDPOINT": "",
     "LATITUDE": 4.2257,
     "LONGITUDE": 1.2345,

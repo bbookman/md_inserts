@@ -2,6 +2,7 @@ import json
 import time
 import os
 import getpass
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -50,11 +51,6 @@ def download_fandango_history(config, password):
     os.makedirs(fandango_dir, exist_ok=True)
     print(f"DEBUG: Fandango directory set to: {fandango_dir}")
     
-    # Create screenshots directory
-    screenshots_dir = os.path.join(fandango_dir, "screenshots")
-    os.makedirs(screenshots_dir, exist_ok=True)
-    print(f"DEBUG: Screenshots will be saved to: {screenshots_dir}")
-    
     print(f"DEBUG: Download directory set to: {download_dir}")
     if not os.path.exists(download_dir):
         print(f"WARNING: Download directory does not exist: {download_dir}")
@@ -93,21 +89,11 @@ def download_fandango_history(config, password):
         # Initialize Chrome WebDriver
         driver = webdriver.Chrome(options=chrome_options)
         print("DEBUG: WebDriver initialized successfully.")
-        
-        # Function to take screenshot with timestamp
-        def take_screenshot(name):
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"{screenshots_dir}/{timestamp}_{name}.png"
-            driver.save_screenshot(filename)
-            print(f"DEBUG: Screenshot saved to {filename}")
 
         # Navigate to Fandango sign-in URL directly
         print(f"DEBUG: Navigating to URL: {url}")
         driver.get(url)
         print(f"DEBUG: Navigation complete. Current URL: {driver.current_url}")
-        
-        # Take screenshot of the login page
-        take_screenshot("login_page")
         
         # Give the page time to fully load
         time.sleep(5)
@@ -120,7 +106,6 @@ def download_fandango_history(config, password):
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.ID, "signin-form"))
             )
-            take_screenshot("form_loaded")
 
             # Find email field - using the full CSS selector path
             print("DEBUG: Finding email field...")
@@ -129,7 +114,6 @@ def download_fandango_history(config, password):
             email_input.clear()
             print(f"DEBUG: Entering username: {username}")
             email_input.send_keys(username)
-            take_screenshot("email_entered")
             
             # Find password field
             print("DEBUG: Finding password field...")
@@ -138,7 +122,6 @@ def download_fandango_history(config, password):
             password_input.clear()
             print("DEBUG: Entering password...")
             password_input.send_keys(password)
-            take_screenshot("password_entered")
             
             # Find and click the submit button
             print("DEBUG: Finding submit button...")
@@ -148,7 +131,6 @@ def download_fandango_history(config, password):
             # Use JavaScript to click the button (sometimes more reliable)
             driver.execute_script("arguments[0].click();", submit_button)
             print("DEBUG: Submit button clicked via JavaScript")
-            take_screenshot("after_submit_click")
             
             # Wait for login to complete and redirect to dashboard
             print("DEBUG: Waiting for login to complete...")
@@ -156,7 +138,6 @@ def download_fandango_history(config, password):
                 EC.url_contains("dashboard")
             )
             print("DEBUG: Login successful, redirected to dashboard.")
-            take_screenshot("dashboard_loaded")
             
             # Skip directly to URL-based pagination for purchase history
             print("\nDEBUG: Using URL-based pagination to extract purchase history...")
@@ -183,9 +164,6 @@ def download_fandango_history(config, password):
                     )
                 except:
                     print(f"DEBUG: Timeout waiting for page {current_page} to load, but continuing anyway")
-                
-                # Take screenshot of the current page
-                take_screenshot(f"page_{current_page}")
                 
                 # Extract movies from this page
                 print(f"DEBUG: Extracting data from page {current_page}")
@@ -237,7 +215,7 @@ def download_fandango_history(config, password):
                                     pass
                                     
                                 try:
-                                    theater_elem = purchase_container.find_element(By.CSS_SELECTOR, ".theater-name, [class*='theater']")
+                                    theater_elem = purchase_container.find_element(By.CSS_SELECTOR, ".theater-name, [class*='theater'], a.dark__link[href*='theater-page']")
                                     if theater_elem:
                                         theater_name = theater_elem.text.strip()
                                 except:
@@ -249,6 +227,11 @@ def download_fandango_history(config, password):
                                         theater_address = address_elem.text.strip()
                                 except:
                                     pass
+                                
+                                # Enhanced debug output including date and location information
+                                print(f"    Date: {date_time}")
+                                print(f"    Theater: {theater_name}")
+                                print(f"    Address: {theater_address}")
                             
                             # Add to the purchase data collection
                             all_purchase_data.append({
@@ -268,12 +251,6 @@ def download_fandango_history(config, password):
                         page_data = _process_purchase_items(driver, purchase_items, current_page)
                         all_purchase_data.extend(page_data)
                 
-                # Save this page's HTML
-                page_html_path = os.path.join(fandango_dir, f"fandango_purchase_history_page_{current_page}.html")
-                with open(page_html_path, "w", encoding="utf-8") as f:
-                    f.write(driver.page_source)
-                print(f"DEBUG: Saved page {current_page} HTML to {page_html_path}")
-                
                 # If no data was found on this page, we've reached the end
                 if not page_has_data:
                     print(f"DEBUG: No data found on page {current_page} - reached the end of purchase history")
@@ -292,27 +269,25 @@ def download_fandango_history(config, password):
                 
                 print(f"DEBUG: Saved {len(all_purchase_data)} total purchase records to {csv_path}")
                 
-                # Also save a combined HTML file for the parser
-                main_html_path = os.path.join(fandango_dir, "fandango_purchase_history.html")
-                with open(main_html_path, "w", encoding="utf-8") as f:
-                    f.write(driver.page_source)
-                print(f"DEBUG: Saved final page HTML to {main_html_path} for parsing")
-                
-                download_successful = True
+                # Make sure the saved files actually exist before returning success
+                if os.path.exists(csv_path) and os.path.getsize(csv_path) > 0:
+                    download_successful = True
+                    print("DEBUG: Verified that files were successfully saved")
+                else:
+                    download_successful = False
+                    print("DEBUG: Failed to save files or files are empty")
             else:
                 print("WARNING: No purchase data was collected across all pages")
+                download_successful = False
 
         except TimeoutException as e:
             print(f"ERROR: Timeout during process: {e}")
-            take_screenshot("timeout_error")
             download_successful = False
         except NoSuchElementException as e:
             print(f"ERROR: Could not find a required element: {e}")
-            take_screenshot("element_not_found")
             download_successful = False
         except Exception as e:
             print(f"ERROR: Unexpected error: {e}")
-            take_screenshot("unexpected_error")
             download_successful = False
 
     except Exception as e:
@@ -389,80 +364,183 @@ def _process_purchase_items(driver, purchase_items, page_number):
             
             # Extract date
             try:
-                date_elem = item.find_element(By.CSS_SELECTOR, ".purchase-date, .dark__sub__text, [class*='date']")
+                # First try to find the date element using specific class for purchase date
+                date_elem = item.find_element(By.CSS_SELECTOR, ".dark__sub__text")
                 if date_elem:
                     movie_data["date"] = date_elem.text.strip()
+                    print(f"  Found date from dark__sub__text: {movie_data['date']}")
             except:
-                print(f"  Could not find date for {movie_data['movie']}")
+                # Fall back to other selectors if specific class not found
+                try:
+                    date_elem = item.find_element(By.CSS_SELECTOR, ".purchase-date, [class*='date']")
+                    if date_elem:
+                        movie_data["date"] = date_elem.text.strip()
+                        print(f"  Found date from alternate selector: {movie_data['date']}")
+                except:
+                    # If still no date found, try to find any element that might contain date patterns
+                    date_texts = driver.execute_script("""
+                        var elements = arguments[0].querySelectorAll('*');
+                        var texts = [];
+                        for (var i = 0; i < elements.length; i++) {
+                            var text = elements[i].textContent.trim();
+                            if (
+                                (text.includes(',') && 
+                                 text.includes('at') && 
+                                 /\\d{4}/.test(text) &&  /* Contains a 4-digit year */
+                                 /\\d{1,2}:\\d{2}/.test(text)) /* Contains time HH:MM */
+                                ||
+                                (/\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}/.test(text)) /* MM/DD/YY format */
+                            ) {
+                                texts.push(text);
+                            }
+                        }
+                        return texts;
+                    """, item)
+                    
+                    if date_texts:
+                        movie_data["date"] = date_texts[0]
+                        print(f"  Found date from text search: {movie_data['date']}")
+                    else:
+                        print(f"  Could not find date for {movie_data['movie']}")
             
             # Extract theater information
             try:
-                theater_elem = item.find_element(By.CSS_SELECTOR, ".theater-name, [class*='theater']")
+                # Look for theater in a link element (most reliable method)
+                theater_elem = item.find_element(By.CSS_SELECTOR, "a.dark__link[href*='theater-page']")
                 if theater_elem:
                     movie_data["theater"] = theater_elem.text.strip()
+                    # Also capture the theater URL which contains the theater ID
+                    theater_url = theater_elem.get_attribute("href")
+                    print(f"  Found theater from link: {movie_data['theater']} (URL: {theater_url})")
+                    
+                    # Extract theater ID from URL for future reference
+                    theater_id = None
+                    if theater_url:
+                        # Extract ID like "AAECU" from "https://www.fandango.com/amc-saratoga-14-AAECU/theater-page"
+                        match = re.search(r'-([A-Z0-9]+)/theater-page', theater_url)
+                        if match:
+                            theater_id = match.group(1)
+                            print(f"  Extracted theater ID: {theater_id}")
             except:
-                # Try alternative approach - look for text that might contain theater info
-                theater_texts = driver.execute_script("""
-                    var elements = arguments[0].querySelectorAll('*');
-                    var texts = [];
-                    for (var i = 0; i < elements.length; i++) {
-                        var text = elements[i].textContent.trim();
-                        if (
-                            (text.includes('AMC') || 
-                            text.includes('Regal') || 
-                            text.includes('Cinema') || 
-                            text.includes('Theater') ||
-                            text.includes('Theatre')) && 
-                            text.length < 100
-                        ) {
-                            texts.push(text);
+                # Fallback to other methods if link approach fails
+                try:
+                    theater_elem = item.find_element(By.CSS_SELECTOR, ".theater-name, [class*='theater']")
+                    if theater_elem:
+                        movie_data["theater"] = theater_elem.text.strip()
+                        print(f"  Found theater via class: {movie_data['theater']}")
+                except:
+                    # If standard selectors fail, try JavaScript to find theater text
+                    theater_texts = driver.execute_script("""
+                        var elements = arguments[0].querySelectorAll('*');
+                        var texts = [];
+                        for (var i = 0; i < elements.length; i++) {
+                            var text = elements[i].textContent.trim();
+                            if (
+                                (text.includes('AMC') || 
+                                text.includes('Regal') || 
+                                text.includes('Cinema') || 
+                                text.includes('Theater') ||
+                                text.includes('Theatre')) && 
+                                text.length < 100
+                            ) {
+                                texts.push(text);
+                            }
                         }
-                    }
-                    return texts;
-                """, item)
-                
-                if theater_texts:
-                    movie_data["theater"] = theater_texts[0]
+                        return texts;
+                    """, item)
+                    
+                    if theater_texts:
+                        movie_data["theater"] = theater_texts[0]
+                        print(f"  Found theater via text search: {movie_data['theater']}")
             
-            # Extract address information
+            # Extract address information - improved to better find addresses near theater links
             try:
-                # Look for elements that might contain address (often follows theater name)
-                address_elem = item.find_element(By.CSS_SELECTOR, ".theater-address, [class*='address'], aside, .dark__tertiary__text")
-                if address_elem:
-                    movie_data["address"] = address_elem.text.strip()
-            except:
-                # Theater addresses are hard to reliably extract - we'll use a fallback approach
-                # Look for text that might be an address (contains numbers and common address words)
-                address_texts = driver.execute_script("""
-                    var elements = arguments[0].querySelectorAll('*');
+                # First look for address specifically near the theater element
+                # Get the theater info section that contains theater and potentially address
+                theater_section = item.find_element(By.CSS_SELECTOR, ".list-item__description--additional-movie-info-section")
+                # Look for address elements after the theater element within the section or nearby
+                address_elements = driver.execute_script("""
+                    // Get the link element (theater link)
+                    var theaterLink = arguments[0].querySelector("a.dark__link[href*='theater-page']");
+                    if (!theaterLink) return [];
+                    
+                    // Find potential address elements - typically after the theater link
+                    var parent = theaterLink.parentElement;
                     var texts = [];
-                    for (var i = 0; i < elements.length; i++) {
-                        var text = elements[i].textContent.trim();
-                        if (
-                            /\\d+/.test(text) && 
-                            (text.includes('St') || 
-                            text.includes('Ave') || 
-                            text.includes('Rd') || 
-                            text.includes('Blvd') ||
-                            text.includes('Street') ||
-                            text.includes('Avenue') ||
-                            text.includes('Road')) && 
-                            text.length < 200
-                        ) {
-                            texts.push(text);
+                    var nextSibling = theaterLink.nextSibling;
+                    
+                    // Check next siblings first
+                    while (nextSibling) {
+                        if (nextSibling.nodeType === 3 && nextSibling.textContent.trim()) { // Text node
+                            texts.push(nextSibling.textContent.trim());
+                        } else if (nextSibling.nodeType === 1) { // Element node
+                            var text = nextSibling.textContent.trim();
+                            if (text) texts.push(text);
                         }
+                        nextSibling = nextSibling.nextSibling;
                     }
+                    
+                    // If no address found in siblings, look at parent's text content
+                    if (texts.length === 0 && parent) {
+                        // Get text content excluding the theater name
+                        var parentText = parent.textContent.replace(theaterLink.textContent, '').trim();
+                        if (parentText) texts.push(parentText);
+                    }
+                    
                     return texts;
-                """, item)
+                """, theater_section)
                 
-                if address_texts:
-                    movie_data["address"] = address_texts[0]
+                if address_elements and len(address_elements) > 0:
+                    # Use the first found text that looks like an address
+                    for text in address_elements:
+                        # Simple check if text might be an address (contains numbers)
+                        if re.search(r'\d', text):
+                            movie_data["address"] = text.strip()
+                            print(f"  Found address near theater link: {movie_data['address']}")
+                            break
+            except:
+                # Fall back to standard selectors if specific approach fails
+                try:
+                    address_elem = item.find_element(By.CSS_SELECTOR, "aside, .theater-address, [class*='address'], .dark__tertiary__text")
+                    if address_elem:
+                        movie_data["address"] = address_elem.text.strip()
+                        print(f"  Found address via standard selectors: {movie_data['address']}")
+                except:
+                    # Theater addresses are hard to reliably extract - use a fallback approach
+                    # Look for text that might be an address (contains numbers and common address words)
+                    address_texts = driver.execute_script("""
+                        var elements = arguments[0].querySelectorAll('*');
+                        var texts = [];
+                        for (var i = 0; i < elements.length; i++) {
+                            var text = elements[i].textContent.trim();
+                            if (
+                                /\\d+/.test(text) && 
+                                (text.includes('St') || 
+                                text.includes('Ave') || 
+                                text.includes('Rd') || 
+                                text.includes('Blvd') ||
+                                text.includes('Street') ||
+                                text.includes('Avenue') ||
+                                text.includes('Road')) && 
+                                text.length < 200
+                            ) {
+                                texts.push(text);
+                            }
+                        }
+                        return texts;
+                    """, item)
+                    
+                    if address_texts:
+                        movie_data["address"] = address_texts[0]
+                        print(f"  Found address via text search: {movie_data['address']}")
+                    else:
+                        print(f"  Could not find address for {movie_data['theater']}")
             
             # Add the processed item to our list
             items_data.append(movie_data)
-            print(f"  Processed: {movie_data['movie']} at {movie_data['theater']}")
+            print(f"  Processed: {movie_data['movie']} at {movie_data['theater']} on {movie_data['date']}")
             
         except Exception as e:
-            print(f"  Error processing item {idx+1} on page {page_number}: {e}")
+            print(f"  Error processing item {idx+1} on page {page_number}: {str(e)}")
     
     return items_data
