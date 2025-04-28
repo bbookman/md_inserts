@@ -8,6 +8,8 @@ from fetcher import fetch_and_process_api_data
 from music_history import MusicHistoryProcessor
 from netflix_history import NetflixHistoryProcessor
 from netflix_downloader import download_netflix_history
+from fandango_downloader import download_fandango_history  # Import the new Fandango downloader
+from fandango_history import FandangoHistoryProcessor  # Import the new Fandango history processor
 from yelp_parser import YelpReviewProcessor  # Import the new YelpReviewProcessor class
 
 def load_config(config_path: str) -> dict:
@@ -191,23 +193,56 @@ def main():
         print("Skipping Netflix history processing as password was not provided.")
     else: # Password provided but download failed
         print("Skipping Netflix history processing as download did not succeed.")
+        
+    # --- Process Fandango Purchase History ---
+    print(f"\n--- Processing Fandango Purchase History ---")
+    # Check if Fandango credentials are specified in config
+    fandango_username = config.get("FANDANGO_USER_NAME")
+    if not fandango_username:
+        print("WARNING: FANDANGO_USER_NAME is not set. Skipping Fandango history processing.")
+    else:
+        # Get Fandango password
+        fandango_password = config.get("FANDANGO_PASSWORD")
+        if not fandango_password:
+            fandango_password = getpass.getpass("Enter Fandango Password: ")
+            
+        if not fandango_password:
+            print("Fandango password not provided. Skipping Fandango purchase history download.")
+        else:
+            print("Downloading Fandango purchase history...")
+            try:
+                fandango_download_succeeded = download_fandango_history(config, fandango_password)
+                if fandango_download_succeeded:
+                    print("Fandango purchase history downloaded successfully.")
+                    # Process the downloaded Fandango purchase history file
+                    try:
+                        fandango_processor = FandangoHistoryProcessor(config)
+                        fandango_processing_result = fandango_processor.append_purchases_to_files(delete_after_processing=True)
+                        if fandango_processing_result:
+                            print("Fandango purchase history processing complete. Original file deleted if data was processed.")
+                        else:
+                            print("Fandango purchase history processing completed with issues. File may not have been deleted.")
+                    except Exception as e:
+                        print(f"ERROR processing Fandango purchase history: {e}")
+                else:
+                    print("Fandango download function completed but reported failure.")
+            except Exception as e:
+                print(f"ERROR during Fandango download call: {e}")
 
     # --- Process Yelp Reviews ---
-    print(f"\n--- Processing Yelp Reviews (will create files if needed) ---")
-    # Check if Yelp HTML file path is specified and not empty in config
+    print(f"\n--- Processing Yelp Reviews ---")
     yelp_html_path = config.get("YELP_USER_REVIEWS_HTML")
     if not yelp_html_path:
-        print("WARNING: YELP_USER_REVIEWS_HTML is not set. Skipping Yelp reviews processing.")
+        print("WARNING: YELP_USER_REVIEWS_HTML is not set. Skipping Yelp review processing.")
     else:
-        print("Proceeding with Yelp reviews processing...")
         try:
             yelp_processor = YelpReviewProcessor(config)
             yelp_processor.append_reviews_to_files()
-            print("Yelp reviews processing complete.")
+            print("Yelp review processing complete.")
         except Exception as e:
             print(f"ERROR processing Yelp reviews: {e}")
 
-    print("\nApplication finished.")
+    print("\nAll processing complete.")
 
 if __name__ == "__main__":
     main()

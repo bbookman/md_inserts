@@ -1,11 +1,11 @@
 {
-    "NEWS_ENDPOINT": "https://real-time-news-data.p.rapidapi.com/top-headlines",
-    "TARGET_DIR": "",
+    "NEWS_ENDPOINT": "",
+    "TARGET_DIR": "Users/brucebookman/bruce_vault/Conversations/journal",
     "WEATHER_ENDPOINT": "",
     "LATITUDE": 4.2257,
     "LONGITUDE": 1.2345,
-    "TOP_MOVIES_ENDPOINT": "https://imdb236.p.rapidapi.com/imdb/top-box-office",
-    "BILLBOARD_ENDPOINT": "https://billboard-api2.p.rapidapi.com/hot-100",
+    "TOP_MOVIES_ENDPOINT": "",
+    "BILLBOARD_ENDPOINT": "",
     "NEWS_PARAMS": {
         "country": "US",
         "lang": "en",
@@ -16,9 +16,11 @@
         "range": "1-10"
     },
     "RAPID_API_KEY": "",
-    "APPLE_MUSIC_FILE_PATH": "Apple Music - Track Play History.csv",
-    "NETFLIX_HISTORY_URL": "https://www.netflix.com/viewingactivity",
+    "APPLE_MUSIC_FILE_PATH": "",
+    "NETFLIX_HISTORY_URL": "",
     "EMAIL_ADDRESS": "",
     "NETFLIX_FILE_LOCATION": "",
-    "YELP_USER_REVIEWS_HTML": "Yelp/html/user_review.html"
+    "YELP_USER_REVIEWS_HTML": "",
+    "FANDANGO_USER_NAME": "bruce.bookman@gmail.com",
+    "FANDANGO_PASSWORD": "sw!ft40918X!"
 }
