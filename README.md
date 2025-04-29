@@ -10,6 +10,7 @@ A utility for adding structured data and content to markdown files based on vari
 - Weather information
 - Top box office movies
 - Billboard Hot 100 music charts
+- Fandango ticket purchases
 
 ### Content History File Processing: Inserts content history from:
 
@@ -46,7 +47,9 @@ The application uses a `config.json` file to store all necessary configuration p
   "NETFLIX_HISTORY_URL": "https://www.netflix.com/viewingactivity",
   "EMAIL_ADDRESS": "your-email@example.com",
   "NETFLIX_FILE_LOCATION": "/path/to/download/netflix/data",
-  "YELP_USER_REVIEWS_HTML": "/path/to/Yelp/html/user_review.html"
+  "YELP_USER_REVIEWS_HTML": "/path/to/Yelp/html/user_review.html",
+  "FANDANGO_USER_NAME": "",
+  "FANDANGO_PASSWORD": ""
 }
 ```
 
@@ -89,6 +92,21 @@ The app specifically looks for files with names in the format `YYYY-MM-DD.md` (e
 - Netflix history CSV files are automatically deleted after processing (configurable)
 
 ## Obtaining data
+
+### Rapid API
+1. Sign up for a RapidAPI account: Visit https://rapidapi.com/ and create an account.
+2. Sign up for the basic service plan for any of the following:
+   - [News](https://rapidapi.com/letscrape-6bRBa3QguO5/api/real-time-news-data)
+   - [Weather](https://rapidapi.com/aptitudeapps/api/easy-weather1)
+   - [Movies](https://rapidapi.com/apininjas/api/imdb236)
+   - [Billboard](https://rapidapi.com/LDVIN/api/billboard-api)
+3. API key:
+     - Click Apps in the top right
+     - In the left sidebar, click "My Apps"
+     - Click the app that was auto generated.  Name might be "default-application_####"
+     - Click Autorization
+     - Click Add Key
+     - Copy the key someplace safe.
 
 ### Apple Music
 
