@@ -317,13 +317,17 @@ class FandangoHistoryProcessor:
         # Delete the history files if requested and there was at least one file processed
         if delete_after_processing and (processed_files > 0 or created_files > 0):
             # Delete CSV file if it exists
-            csv_deleted = self.delete_fandango_history_file()
+            # csv_deleted = self.delete_fandango_history_file()
             
             # Import and call the function to delete the fandango directory
-            from fandango_downloader import delete_fandango_directory
-            dir_deleted = delete_fandango_directory()
+            # from fandango_downloader import delete_fandango_directory
+            # dir_deleted = delete_fandango_directory()
             
             # Return true only if both operations were successful
-            return csv_deleted and dir_deleted
+            # return csv_deleted and dir_deleted
+            
+            # Return true - skipping CSV and directory deletion
+            print("Note: CSV file deletion has been commented out - file will be preserved.")
+            return True
             
         return True

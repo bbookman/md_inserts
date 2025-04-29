@@ -261,17 +261,51 @@ def download_fandango_history(config, password):
                             theater_name = theater_link.text.strip()
                             print(f"  Found theater: {theater_name}")
                         
-                        # Extract address
+                        # Enhanced address extraction with multiple approaches
                         theater_address = "Unknown"
+                        
+                        # APPROACH 1: Look for aside directly after theater link within same parent
                         if theater_link:
-                            # Try to find an aside element near the theater link
                             theater_section = theater_link.parent
                             if theater_section:
+                                # Check for aside as direct sibling
                                 aside_elem = theater_section.select_one('aside')
-                                if aside_elem:
+                                if aside_elem and aside_elem.text:
                                     theater_address = aside_elem.text.strip()
-                                    print(f"  Found address: {theater_address}")
+                                    print(f"  Found address (approach 1): {theater_address}")
                         
+                        # APPROACH 2: Try to find any aside within the entire purchase item that's near a theater link
+                        if theater_address == "Unknown":
+                            theater_sections = item.select('.list-item__description--additional-movie-info-section')
+                            for section in theater_sections:
+                                if section.select_one('a.dark__link[href*="theater-page"]'):
+                                    aside_elem = section.select_one('aside')
+                                    if aside_elem and aside_elem.text:
+                                        theater_address = aside_elem.text.strip()
+                                        print(f"  Found address (approach 2): {theater_address}")
+                                        break
+                                        
+                        # APPROACH 3: Look for any aside element in the container 
+                        if theater_address == "Unknown":
+                            aside_elems = item.select('aside')
+                            for aside in aside_elems:
+                                if aside.text and re.search(r'\d+.*\d{5}', aside.text):  # Look for text with street number and zip code
+                                    theater_address = aside.text.strip()
+                                    print(f"  Found address (approach 3): {theater_address}")
+                                    break
+                                    
+                        # APPROACH 4: Look for any element with address-like content using text analysis
+                        if theater_address == "Unknown" and theater_name != "Unknown":
+                            # Find elements that might contain addresses by checking for address patterns
+                            for elem in item.select('div, span, p'):
+                                text = elem.text.strip()
+                                # Look for common address patterns
+                                if (re.search(r'\d+\s+\w+\s+(?:St|Ave|Rd|Blvd|Lane|Dr|Circle|Hwy|Highway|Pkwy|Parkway)', text, re.IGNORECASE) or
+                                    re.search(r'\w+,\s*[A-Z]{2}\s*\d{5}', text)):  # City, State ZIP
+                                    theater_address = text
+                                    print(f"  Found address (approach 4): {theater_address}")
+                                    break
+
                         # Add to the purchase data collection
                         all_purchase_data.append({
                             "movie": movie_name,
