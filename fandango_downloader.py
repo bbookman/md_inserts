@@ -44,11 +44,13 @@ def download_fandango_history(config, password):
         print("Error: Fandango password is required.")
         return False
 
-    # Set download directory (user's Downloads folder)
+    # Set download directory (user's Downloads folder for CSV output)
     download_dir = os.path.expanduser("~/Downloads")
     
-    # Create fandango directory inside downloads if it doesn't exist
-    fandango_dir = os.path.join(download_dir, "fandango")
+    # Create fandango directory inside the project folder instead of Downloads
+    # Get the current working directory (project root)
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    fandango_dir = os.path.join(project_dir, "fandango")
     os.makedirs(fandango_dir, exist_ok=True)
     print(f"DEBUG: Fandango directory set to: {fandango_dir}")
     
@@ -333,3 +335,28 @@ def download_fandango_history(config, password):
             print("DEBUG: WebDriver was not initialized, nothing to quit.")
         print(f"DEBUG: Exiting download_fandango_history function. Success: {download_successful}")
         return download_successful
+
+def delete_fandango_directory():
+    """
+    Delete the fandango directory that contains the HTML files.
+    
+    Returns:
+        bool: True if deletion was successful, False otherwise.
+    """
+    # Get the current working directory (project root)
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    fandango_dir = os.path.join(project_dir, "fandango")
+    
+    if not os.path.exists(fandango_dir):
+        print(f"WARNING: Fandango directory not found for deletion: {fandango_dir}")
+        return False
+    
+    try:
+        # Use shutil.rmtree to remove directory and all its contents
+        import shutil
+        shutil.rmtree(fandango_dir)
+        print(f"Successfully deleted Fandango directory: {fandango_dir}")
+        return True
+    except Exception as e:
+        print(f"ERROR: Failed to delete Fandango directory: {e}")
+        return False

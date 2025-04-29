@@ -247,9 +247,10 @@ class FandangoHistoryProcessor:
                 date_obj = datetime.strptime(file_date, '%Y-%m-%d')
                 year = date_obj.strftime('%Y')
                 month = date_obj.strftime('%m') # Get month number (e.g., 02)
+                month_name = date_obj.strftime('%B') # Get full month name (e.g., February)
 
-                # Construct the target directory path as TARGET_DIR/YYYY/MM/
-                target_subdir = os.path.join(self.target_dir, year, month)
+                # Construct the target directory path as TARGET_DIR/YYYY/MM-Month/
+                target_subdir = os.path.join(self.target_dir, year, f"{month}-{month_name}")
                 file_name = f"{file_date}.md"
                 file_path = os.path.join(target_subdir, file_name)
 
@@ -316,6 +317,13 @@ class FandangoHistoryProcessor:
         # Delete the history files if requested and there was at least one file processed
         if delete_after_processing and (processed_files > 0 or created_files > 0):
             # Delete CSV file if it exists
-            return self.delete_fandango_history_file()
+            csv_deleted = self.delete_fandango_history_file()
+            
+            # Import and call the function to delete the fandango directory
+            from fandango_downloader import delete_fandango_directory
+            dir_deleted = delete_fandango_directory()
+            
+            # Return true only if both operations were successful
+            return csv_deleted and dir_deleted
             
         return True
