@@ -47,10 +47,16 @@ def download_fandango_history(config, password):
     # Set download directory (user's Downloads folder for CSV output)
     download_dir = os.path.expanduser("~/Downloads")
     
-    # Create fandango directory inside the project folder instead of Downloads
-    # Get the current working directory (project root)
-    project_dir = os.path.dirname(os.path.abspath(__file__))
-    fandango_dir = os.path.join(project_dir, "fandango")
+    # Get temp directory from config or use default location
+    temp_dir = config.get("TEMP_FILE_LOC", "./temp")
+    # Ensure temp_dir is an absolute path
+    if not os.path.isabs(temp_dir):
+        # Get the current working directory (project root)
+        project_dir = os.path.dirname(os.path.abspath(__file__))
+        temp_dir = os.path.abspath(os.path.join(project_dir, temp_dir))
+    
+    # Create fandango directory inside the temp directory
+    fandango_dir = os.path.join(temp_dir, "fandango")
     os.makedirs(fandango_dir, exist_ok=True)
     print(f"DEBUG: Fandango directory set to: {fandango_dir}")
     
@@ -377,15 +383,24 @@ def delete_fandango_directory():
     Returns:
         bool: True if deletion was successful, False otherwise.
     """
-    # Get the current working directory (project root)
-    project_dir = os.path.dirname(os.path.abspath(__file__))
-    fandango_dir = os.path.join(project_dir, "fandango")
-    
-    if not os.path.exists(fandango_dir):
-        print(f"WARNING: Fandango directory not found for deletion: {fandango_dir}")
-        return False
-    
+    # Load config to get the temp directory location
     try:
+        config = load_config()
+        temp_dir = config.get("TEMP_FILE_LOC", "./temp")
+        
+        # Ensure temp_dir is an absolute path
+        if not os.path.isabs(temp_dir):
+            # Get the current working directory (project root)
+            project_dir = os.path.dirname(os.path.abspath(__file__))
+            temp_dir = os.path.abspath(os.path.join(project_dir, temp_dir))
+        
+        # Path to fandango directory
+        fandango_dir = os.path.join(temp_dir, "fandango")
+        
+        if not os.path.exists(fandango_dir):
+            print(f"WARNING: Fandango directory not found for deletion: {fandango_dir}")
+            return False
+        
         # Use shutil.rmtree to remove directory and all its contents
         import shutil
         shutil.rmtree(fandango_dir)
