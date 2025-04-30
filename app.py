@@ -37,16 +37,16 @@ def main():
     # --- Netflix Configuration Check ---
     netflix_file_location = config.get("NETFLIX_FILE_LOCATION")
     netflix_history_url = config.get("NETFLIX_HISTORY_URL")
-    email_address = config.get("EMAIL_ADDRESS")
+    netflix_email_address = config.get("NETFLIX_EMAIL_ADDRESS")
     
     # Skip Netflix processing if any required Netflix config is missing
-    if not netflix_file_location or not netflix_history_url or not email_address:
+    if not netflix_file_location or not netflix_history_url or not netflix_email_address:
         if not netflix_file_location:
             print("WARNING: NETFLIX_FILE_LOCATION is not set. Skipping Netflix download and processing.")
         if not netflix_history_url:
             print("WARNING: NETFLIX_HISTORY_URL is not set. Skipping Netflix download and processing.")
-        if not email_address:
-            print("WARNING: EMAIL_ADDRESS is not set. Skipping Netflix download and processing.")
+        if not netflix_email_address:
+            print("WARNING: NETFLIX_EMAIL_ADDRESS is not set. Skipping Netflix download and processing.")
         netflix_password = None  # Skip Netflix processing
         download_succeeded = False
     else:

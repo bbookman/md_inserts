@@ -26,14 +26,14 @@ def download_netflix_history(config, password):
     print("DEBUG: download_netflix_history function started.") # Added
     # Extract values from config
     url = config.get("NETFLIX_HISTORY_URL")
-    username = config.get("EMAIL_ADDRESS")
+    username = config.get("NETFLIX_EMAIL_ADDRESS")
     print(f"DEBUG: URL: {url}, Username: {username}")
     # Validate required parameters
     if not url:
         print("Error: Netflix history URL not found in config.")
         return False
     if not username:
-        print("Error: Netflix EMAIL_ADDRESS required in config.")
+        print("Error: Netflix NETFLIX_EMAIL_ADDRESS required in config.")
         return False
     if not password:
         print("Error: Netflix password is required.")

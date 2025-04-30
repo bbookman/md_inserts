@@ -14,7 +14,7 @@ A utility for adding structured data and content to markdown files based on vari
 
 ### Content History File Processing: Inserts content history from:
 
-- Your Netflix viewing history with automatic downloading. Requires EMAIL_ADDRESS, Currently prompts for password.
+- Your Netflix viewing history with automatic downloading. Requires NETFLIX_EMAIL_ADDRESS, Currently prompts for password.
 - Your Yelp reviews. Requires sending request to Yelp.
 - Your Apple Music listening history. Requires sending request to Apple.
 
@@ -45,7 +45,7 @@ The application uses a `config.json` file to store all necessary configuration p
   "RAPID_API_KEY": "your-rapid-api-key",
   "APPLE_MUSIC_FILE_PATH": "/path/to/Apple Music - Track Play History.csv",
   "NETFLIX_HISTORY_URL": "https://www.netflix.com/viewingactivity",
-  "EMAIL_ADDRESS": "your-email@example.com",
+  "NETFLIX_EMAIL_ADDRESS": "your-email@example.com",
   "NETFLIX_FILE_LOCATION": "/path/to/download/netflix/data",
   "YELP_USER_REVIEWS_HTML": "/path/to/Yelp/html/user_review.html",
   "FANDANGO_USER_NAME": "",
@@ -88,7 +88,7 @@ The app specifically looks for files with names in the format `YYYY-MM-DD.md` (e
 
 - If `RAPID_API_KEY` is not set, all API-based data retrieval will be skipped
 - If specific API endpoints like `NEWS_ENDPOINT`, `WEATHER_ENDPOINT`, etc. are not set, those specific data sources will be skipped
-- If Netflix configuration parameters (`NETFLIX_HISTORY_URL`, `EMAIL_ADDRESS`, or `NETFLIX_FILE_LOCATION`) are missing, Netflix data processing will be skipped
+- If Netflix configuration parameters (`NETFLIX_HISTORY_URL`, `NETFLIX_EMAIL_ADDRESS`, or `NETFLIX_FILE_LOCATION`) are missing, Netflix data processing will be skipped
 - Netflix history CSV files are automatically deleted after processing (configurable)
 
 ## Obtaining data
