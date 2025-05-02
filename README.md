@@ -12,11 +12,13 @@ A utility for adding structured data and content to markdown files based on vari
 - Billboard Hot 100 music charts
 - Fandango ticket purchases
 
+
 ### Content History File Processing: Inserts content history from:
 
 - Your Netflix viewing history with automatic downloading. Requires NETFLIX_EMAIL_ADDRESS, Currently prompts for password.
 - Your Yelp reviews. Requires sending request to Yelp.
 - Your Apple Music listening history. Requires sending request to Apple.
+- Ticketmaster event data. Requires manual copy and paste of event data to csv file "events.csv"
 
 **See below for information on how to obtain the required files**
 
@@ -49,7 +51,8 @@ The application uses a `config.json` file to store all necessary configuration p
   "NETFLIX_FILE_LOCATION": "/path/to/download/netflix/data",
   "YELP_USER_REVIEWS_HTML": "/path/to/Yelp/html/user_review.html",
   "FANDANGO_USER_NAME": "",
-  "FANDANGO_PASSWORD": ""
+  "FANDANGO_PASSWORD": "",
+  "TICKET_MASTER_CSV_FILE": "/path/to/events.csv",
 }
 ```
 
