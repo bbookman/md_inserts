@@ -11,6 +11,7 @@ from netflix_downloader import download_netflix_history
 from fandango_downloader import download_fandango_history  # Import the new Fandango downloader
 from fandango_history import FandangoHistoryProcessor  # Import the new Fandango history processor
 from yelp_parser import YelpReviewProcessor  # Import the new YelpReviewProcessor class
+from ticketmaster_parser import TicketmasterProcessor  # Import the new TicketmasterProcessor class
 
 def load_config(config_path: str) -> dict:
     with open(config_path, 'r', encoding='utf-8') as f:
@@ -247,6 +248,22 @@ def main():
             print("Yelp review processing complete.")
         except Exception as e:
             print(f"ERROR processing Yelp reviews: {e}")
+            
+    # --- Process Ticketmaster Events ---
+    print(f"\n--- Processing Ticketmaster Events ---")
+    ticketmaster_csv_path = config.get("TICKET_MASTER_CSV_FILE")
+    if not ticketmaster_csv_path:
+        print("WARNING: TICKET_MASTER_CSV_FILE is not set. Skipping Ticketmaster event processing.")
+    else:
+        try:
+            if not os.path.exists(ticketmaster_csv_path):
+                print(f"ERROR: Ticketmaster CSV file not found at {ticketmaster_csv_path}")
+            else:
+                ticketmaster_processor = TicketmasterProcessor(config)
+                ticketmaster_processor.append_events_to_files()
+                print("Ticketmaster event processing complete.")
+        except Exception as e:
+            print(f"ERROR processing Ticketmaster events: {e}")
 
     print("\nAll processing complete.")
 
