@@ -1,6 +1,6 @@
 {
     "NEWS_ENDPOINT": "",
-    "TARGET_DIR": "./test",
+    "TARGET_DIR": "",
     "WEATHER_ENDPOINT": "",
     "LATITUDE": 4.2257,
     "LONGITUDE": 1.2345,
@@ -23,5 +23,6 @@
     "YELP_USER_REVIEWS_HTML": "",
     "FANDANGO_USER_NAME": "",
     "FANDANGO_PASSWORD": "",
-    "TEMP_FILE_LOC": "./temp"
+    "TEMP_FILE_LOC": "./temp",
+    "TICKET_MASTER_CSV_FILE": ""
 }

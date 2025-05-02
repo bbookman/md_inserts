@@ -252,8 +252,8 @@ def main():
     # --- Process Ticketmaster Events ---
     print(f"\n--- Processing Ticketmaster Events ---")
     ticketmaster_csv_path = config.get("TICKET_MASTER_CSV_FILE")
-    if not ticketmaster_csv_path:
-        print("WARNING: TICKET_MASTER_CSV_FILE is not set. Skipping Ticketmaster event processing.")
+    if not ticketmaster_csv_path or ticketmaster_csv_path.strip() == "":
+        print("WARNING: TICKET_MASTER_CSV_FILE is not set or empty. Skipping Ticketmaster event processing.")
     else:
         try:
             if not os.path.exists(ticketmaster_csv_path):
